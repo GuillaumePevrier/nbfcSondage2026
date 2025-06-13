@@ -12,8 +12,7 @@ async function readResponses(): Promise<PlayerResponses> {
     const data = await fs.readFile(dataFilePath, 'utf-8');
     return JSON.parse(data) as PlayerResponses;
   } catch (error) {
-    // If file doesn't exist or is invalid, return empty object
-    console.error('Error reading responses file:', error);
+    console.error('Erreur lors de la lecture du fichier de réponses:', error);
     return {};
   }
 }
@@ -22,8 +21,8 @@ async function writeResponses(responses: PlayerResponses): Promise<void> {
   try {
     await fs.writeFile(dataFilePath, JSON.stringify(responses, null, 2), 'utf-8');
   } catch (error) {
-    console.error('Error writing responses file:', error);
-    throw new Error('Failed to save responses.');
+    console.error('Erreur lors de l\'écriture du fichier de réponses:', error);
+    throw new Error('Échec de la sauvegarde des réponses.');
   }
 }
 
@@ -36,8 +35,8 @@ export async function getAIMotivationalMessageAction(playerName: string, willCon
     const result = await generateMotivationalMessage({ playerName, willContinue });
     return result.message;
   } catch (error) {
-    console.error('Error generating motivational message:', error);
-    return "Keep pushing your limits and striving for greatness. Your dedication is inspiring!";
+    console.error('Erreur lors de la génération du message de motivation:', error);
+    return "Continuez à repousser vos limites et à viser l'excellence. Votre dévouement est une source d'inspiration !";
   }
 }
 
@@ -46,7 +45,7 @@ export async function finalizeSurveyAction(
   motivationalMessage: string
 ): Promise<{ success: boolean; error?: string; data?: PlayerResponse }> {
   if (!formData.playerName || formData.willContinue === undefined) {
-    return { success: false, error: 'Player name and decision are required.' };
+    return { success: false, error: 'Le nom du joueur et sa décision sont requis.' };
   }
 
   try {
@@ -54,7 +53,7 @@ export async function finalizeSurveyAction(
     const now = new Date().toISOString();
 
     const updatedResponse: PlayerResponse = {
-      ...responses[formData.playerName], // Preserve any existing data
+      ...responses[formData.playerName], 
       playerName: formData.playerName,
       continues: formData.willContinue,
       surveyCompleted: true,
@@ -68,8 +67,8 @@ export async function finalizeSurveyAction(
     
     return { success: true, data: updatedResponse };
   } catch (error) {
-    console.error('Error finalizing survey:', error);
-    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
-    return { success: false, error: `Failed to save survey: ${errorMessage}` };
+    console.error('Erreur lors de la finalisation du sondage:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Une erreur inconnue est survenue.';
+    return { success: false, error: `Échec de la sauvegarde du sondage : ${errorMessage}` };
   }
 }

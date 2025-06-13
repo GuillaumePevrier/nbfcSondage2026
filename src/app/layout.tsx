@@ -4,8 +4,8 @@ import { Toaster } from "@/components/ui/toaster";
 import AppProviders from '@/components/app-providers';
 
 export const metadata: Metadata = {
-  title: 'Futsal Future Survey',
-  description: 'Survey for Futsal team players',
+  title: 'Sondage NBFC Futsal Club',
+  description: 'Sondage pour les joueurs du NBFC Futsal Club',
 };
 
 export default function RootLayout({
@@ -14,7 +14,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="fr" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

@@ -1,9 +1,36 @@
 {
-  "Guillaume P.": { "playerName": "Guillaume P.", "surveyCompleted": false },
-  "Antoine G.": { "playerName": "Antoine G.", "surveyCompleted": false },
-  "Kylian M.": { "playerName": "Kylian M.", "surveyCompleted": false },
-  "Zinedine Z.": { "playerName": "Zinedine Z.", "surveyCompleted": false },
-  "Michel P.": { "playerName": "Michel P.", "surveyCompleted": false },
-  "Lilian T.": { "playerName": "Lilian T.", "surveyCompleted": false },
-  "Didier D.": { "playerName": "Didier D.", "surveyCompleted": false }
+  "Guillaume P.": {
+    "playerName": "Guillaume P.",
+    "surveyCompleted": true,
+    "continues": false,
+    "timestamp": "2025-06-13T17:40:08.034Z",
+    "motivationalMessage": "Guillaume, we're thrilled to have you back next season! Keep pushing yourself and striving for excellence on the court. Your dedication makes a real difference to the team."
+  },
+  "Antoine G.": {
+    "playerName": "Antoine G.",
+    "surveyCompleted": false
+  },
+  "Kylian M.": {
+    "playerName": "Kylian M.",
+    "surveyCompleted": true,
+    "continues": true,
+    "timestamp": "2025-06-13T17:39:27.592Z",
+    "motivationalMessage": "Kylian, we're thrilled you're staying with the team! Keep pushing your limits and strive for greatness this season. Your dedication inspires us all!"
+  },
+  "Zinedine Z.": {
+    "playerName": "Zinedine Z.",
+    "surveyCompleted": false
+  },
+  "Michel P.": {
+    "playerName": "Michel P.",
+    "surveyCompleted": false
+  },
+  "Lilian T.": {
+    "playerName": "Lilian T.",
+    "surveyCompleted": false
+  },
+  "Didier D.": {
+    "playerName": "Didier D.",
+    "surveyCompleted": false
+  }
 }

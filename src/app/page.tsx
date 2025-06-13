@@ -10,7 +10,7 @@ import Image from 'next/image';
 
 export default async function HomePage() {
   const responses = await getPlayerResponses();
-  const allPlayers = players; // Defined in src/lib/players.ts
+  const allPlayers = players; 
 
   return (
     <>
@@ -21,21 +21,21 @@ export default async function HomePage() {
           style={{ backgroundImage: "url('https://placehold.co/1920x1080.png')" }}
           data-ai-hint="futsal stadium lights"
         >
-          <div className="absolute inset-0 bg-black/50"></div>
+          <div className="absolute inset-0 bg-black/60"></div>
           <div className="container px-4 md:px-6 relative z-10">
             <div className="flex flex-col items-center space-y-4 text-center">
               <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl font-headline text-primary-foreground">
-                Futsal Future: Your Voice Matters!
+                Avenir Futsal : Votre Avis Compte !
               </h1>
               <p className="mx-auto max-w-[700px] text-primary-foreground/80 md:text-xl">
-                Help us plan for the next season. Let us know if you're continuing with the team.
+                Aidez-nous à planifier la prochaine saison. Faites-nous savoir si vous continuez avec l'équipe.
               </p>
               <div className="space-x-4">
                 <Button size="lg" asChild className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                  <Link href="/survey">Take the Survey</Link>
+                  <Link href="/survey">Participer au Sondage</Link>
                 </Button>
                 <Button variant="secondary" size="lg" asChild>
-                  <Link href="/results">View Team Responses</Link>
+                  <Link href="/results">Voir les Réponses</Link>
                 </Button>
               </div>
             </div>
@@ -46,9 +46,9 @@ export default async function HomePage() {
           <div className="container px-4 md:px-6">
             <Card className="shadow-xl">
               <CardHeader>
-                <CardTitle className="font-headline text-3xl">Team Roster & Survey Status</CardTitle>
+                <CardTitle className="font-headline text-3xl">Liste de l'Équipe & Statut du Sondage</CardTitle>
                 <CardDescription>
-                  Check who has responded to the survey. Click on a player's name to start or view their survey (if you're them!).
+                  Vérifiez qui a répondu au sondage. Cliquez sur le nom d'un joueur pour commencer ou voir son sondage.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -56,8 +56,8 @@ export default async function HomePage() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="w-[200px]">Player Name</TableHead>
-                        <TableHead>Status</TableHead>
+                        <TableHead className="w-[200px]">Nom du Joueur</TableHead>
+                        <TableHead>Statut</TableHead>
                         <TableHead className="text-right">Action</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -72,17 +72,17 @@ export default async function HomePage() {
                             <TableCell>
                               {hasResponded ? (
                                 continues ? (
-                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                    <CheckCircle2 className="w-4 h-4 mr-1.5" /> Continuing
+                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                    <CheckCircle2 className="w-4 h-4 mr-1.5" /> Continue
                                   </span>
                                 ) : (
-                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                    <XCircle className="w-4 h-4 mr-1.5" /> Not Continuing
+                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                                    <XCircle className="w-4 h-4 mr-1.5" /> Ne continue pas
                                   </span>
                                 )
                               ) : (
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                  <Hourglass className="w-4 h-4 mr-1.5" /> Pending
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                                  <Hourglass className="w-4 h-4 mr-1.5" /> En attente
                                 </span>
                               )}
                             </TableCell>
@@ -90,7 +90,7 @@ export default async function HomePage() {
                               <Button variant="outline" size="sm" asChild>
                                 <Link href={`/survey?playerName=${encodeURIComponent(player.name)}`}>
                                   <Edit3 className="w-4 h-4 mr-1.5" />
-                                  {hasResponded ? 'View/Edit' : 'Start Survey'}
+                                  {hasResponded ? 'Voir/Modifier' : 'Commencer'}
                                 </Link>
                               </Button>
                             </TableCell>
@@ -108,7 +108,7 @@ export default async function HomePage() {
       <footer className="py-6 md:px-8 md:py-0 bg-card border-t">
         <div className="container flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row">
           <p className="text-balance text-center text-sm leading-loose text-muted-foreground md:text-left">
-            Built for the love of Futsal.
+            Construit pour l'amour du Futsal. © {new Date().getFullYear()} NBFC Futsal Club
           </p>
         </div>
       </footer>

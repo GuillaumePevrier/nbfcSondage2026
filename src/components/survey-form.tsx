@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -13,24 +12,25 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
+import { Label } from '@/components/ui/label'; // Not directly used, but RadioGroupItem might need it.
 import { useToast } from '@/hooks/use-toast';
 import { players, type SurveyFormData } from '@/lib/players';
 import { getAIMotivationalMessageAction, finalizeSurveyAction } from '@/actions/surveyActions';
 import { Dribbble, PlayCircle, ChevronLeft, ChevronRight, Send, Loader2, Smile, Frown } from 'lucide-react';
+import Image from 'next/image'; // For logo if needed inside form
 
 const formSchema = z.object({
-  playerName: z.string().min(1, 'Player name is required.'),
-  willContinue: z.enum(['yes', 'no'], { required_error: 'Please select an option.' }),
+  playerName: z.string().min(1, 'Le nom du joueur est requis.'),
+  willContinue: z.enum(['yes', 'no'], { required_error: 'Veuillez sélectionner une option.' }),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
 const steps = [
-  { id: 'welcome', title: 'Welcome!' },
-  { id: 'decision', title: 'Your Plans?' },
-  { id: 'motivation', title: 'A Little Boost!' },
-  { id: 'complete', title: 'Thank You!' },
+  { id: 'welcome', title: 'Bienvenue !' },
+  { id: 'decision', title: 'Vos Projets ?' },
+  { id: 'motivation', title: 'Un Petit Coup de Pouce !' },
+  { id: 'complete', title: 'Merci !' },
 ];
 
 const slideVariants = {
@@ -90,7 +90,7 @@ export function SurveyForm() {
         setMotivationalMessage(message);
         setCurrentStep((prev) => prev + 1);
       } catch (error) {
-        toast({ title: 'Error', description: 'Could not fetch motivational message.', variant: 'destructive' });
+        toast({ title: 'Erreur', description: 'Impossible de récupérer le message de motivation.', variant: 'destructive' });
       } finally {
         setIsLoading(false);
       }
@@ -106,7 +106,7 @@ export function SurveyForm() {
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     if (!motivationalMessage) {
-      toast({ title: 'Error', description: 'Motivational message not generated yet.', variant: 'destructive' });
+      toast({ title: 'Erreur', description: 'Message de motivation non encore généré.', variant: 'destructive' });
       return;
     }
     setIsSubmitting(true);
@@ -119,12 +119,12 @@ export function SurveyForm() {
 
       if (result.success && result.data) {
         const emailParams = {
-          to_name: 'Team Manager',
+          to_name: 'Manager de l\'équipe',
           from_name: data.playerName,
           player_name: data.playerName,
-          decision: data.willContinue === 'yes' ? 'Continuing next season' : 'Not continuing next season',
+          decision: data.willContinue === 'yes' ? 'Continue la saison prochaine' : 'Ne continue pas la saison prochaine',
           motivational_message: motivationalMessage,
-          reply_to: 'no-reply@futsalfuture.com',
+          reply_to: 'no-reply@futsalfuture.com', // Update with a relevant domain
         };
         
         const EMAILJS_SERVICE_ID = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || 'YOUR_EMAILJS_SERVICE_ID';
@@ -132,20 +132,20 @@ export function SurveyForm() {
         const EMAILJS_PUBLIC_KEY = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || 'YOUR_EMAILJS_PUBLIC_KEY';
 
         if (EMAILJS_SERVICE_ID === 'YOUR_EMAILJS_SERVICE_ID' || EMAILJS_TEMPLATE_ID === 'YOUR_EMAILJS_TEMPLATE_ID' || EMAILJS_PUBLIC_KEY === 'YOUR_EMAILJS_PUBLIC_KEY') {
-           console.warn("EmailJS not configured. Please set NEXT_PUBLIC_EMAILJS_SERVICE_ID, NEXT_PUBLIC_EMAILJS_TEMPLATE_ID, and NEXT_PUBLIC_EMAILJS_PUBLIC_KEY in your .env.local file.");
-           toast({ title: 'Survey Submitted (Email Skipped)', description: 'Response saved. EmailJS not configured.' });
+           console.warn("EmailJS non configuré. Veuillez définir NEXT_PUBLIC_EMAILJS_SERVICE_ID, NEXT_PUBLIC_EMAILJS_TEMPLATE_ID, et NEXT_PUBLIC_EMAILJS_PUBLIC_KEY dans votre fichier .env ou .env.local.");
+           toast({ title: 'Sondage Soumis (Email non envoyé)', description: 'Réponse enregistrée. EmailJS non configuré.' });
         } else {
             await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, emailParams, EMAILJS_PUBLIC_KEY);
-            toast({ title: 'Survey Submitted!', description: 'Your response has been recorded and an email sent.' });
+            toast({ title: 'Sondage Soumis !', description: 'Votre réponse a été enregistrée et un email envoyé.' });
         }
         
         setCurrentStep((prev) => prev + 1);
       } else {
-        toast({ title: 'Submission Failed', description: result.error || 'Could not save your response.', variant: 'destructive' });
+        toast({ title: 'Échec de la Soumission', description: result.error || 'Impossible d\'enregistrer votre réponse.', variant: 'destructive' });
       }
     } catch (error) {
-      console.error('Submission error:', error);
-      toast({ title: 'Submission Error', description: 'An unexpected error occurred.', variant: 'destructive' });
+      console.error('Erreur de soumission:', error);
+      toast({ title: 'Erreur de Soumission', description: 'Une erreur inattendue est survenue.', variant: 'destructive' });
     } finally {
       setIsSubmitting(false);
     }
@@ -154,15 +154,16 @@ export function SurveyForm() {
   const currentStepDetails = useMemo(() => steps[currentStep], [currentStep]);
 
   return (
-    <Card className="w-full shadow-2xl bg-card/90 backdrop-blur-sm">
+    <Card className="w-full shadow-2xl bg-card/95 backdrop-blur-sm">
       <CardHeader className="text-center">
         <div className="flex justify-center mb-4">
-          <Dribbble className="w-12 h-12 text-primary" />
+          {/* Using the club logo here if available, or Dribbble as a fallback */}
+          <Image src="/logo.png" alt="Logo du Club" width={60} height={60} />
         </div>
         <CardTitle className="font-headline text-4xl">{currentStepDetails.title}</CardTitle>
-        {currentStep === 0 && <CardDescription className="text-lg">Help us plan for an amazing next season!</CardDescription>}
+        {currentStep === 0 && <CardDescription className="text-lg">Aidez-nous à planifier une prochaine saison incroyable !</CardDescription>}
       </CardHeader>
-      <CardContent className="min-h-[300px] flex items-center justify-center overflow-hidden p-6">
+      <CardContent className="min-h-[280px] flex items-center justify-center overflow-hidden p-6">
         <AnimatePresence initial={false} custom={direction} mode="wait">
           <motion.div
             key={currentStep}
@@ -178,7 +179,7 @@ export function SurveyForm() {
                 {currentStep === 0 && ( 
                   <div className="text-center space-y-6">
                     <p className="text-xl">
-                      Your input is crucial for our team's success. This quick survey will help us understand your availability for the upcoming Futsal season.
+                      Votre avis est crucial pour le succès de notre équipe. Ce rapide sondage nous aidera à comprendre votre disponibilité pour la prochaine saison de Futsal.
                     </p>
                   </div>
                 )}
@@ -190,11 +191,11 @@ export function SurveyForm() {
                     name="playerName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-lg font-medium">Player Name</FormLabel>
+                        <FormLabel className="text-lg font-medium">Nom du Joueur</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
                           <FormControl>
                             <SelectTrigger className="text-base">
-                              <SelectValue placeholder="Select your name" />
+                              <SelectValue placeholder="Sélectionnez votre nom" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -214,24 +215,24 @@ export function SurveyForm() {
                     name="willContinue"
                     render={({ field }) => (
                       <FormItem className="space-y-3">
-                        <FormLabel className="text-lg font-medium">Are you with us for the next season?</FormLabel>
+                        <FormLabel className="text-lg font-medium">Êtes-vous avec nous pour la saison prochaine ?</FormLabel>
                         <FormControl>
                           <RadioGroup
                             onValueChange={field.onChange}
                             defaultValue={field.value}
-                            className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-4"
+                            className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-4 pt-2"
                           >
                             <FormItem className="flex items-center space-x-3 space-y-0">
                               <FormControl>
-                                <RadioGroupItem value="yes" />
+                                <RadioGroupItem value="yes" id="willContinue-yes"/>
                               </FormControl>
-                              <FormLabel className="font-normal text-base flex items-center"><Smile className="mr-2 h-5 w-5 text-green-500"/>Yes, I'm in!</FormLabel>
+                              <Label htmlFor="willContinue-yes" className="font-normal text-base flex items-center cursor-pointer"><Smile className="mr-2 h-5 w-5 text-green-500"/>Oui, je suis partant !</Label>
                             </FormItem>
                             <FormItem className="flex items-center space-x-3 space-y-0">
                               <FormControl>
-                                <RadioGroupItem value="no" />
+                                <RadioGroupItem value="no" id="willContinue-no"/>
                               </FormControl>
-                              <FormLabel className="font-normal text-base flex items-center"><Frown className="mr-2 h-5 w-5 text-red-500"/>No, I'm out this time.</FormLabel>
+                              <Label htmlFor="willContinue-no" className="font-normal text-base flex items-center cursor-pointer"><Frown className="mr-2 h-5 w-5 text-red-500"/>Non, je ne serai pas là cette fois.</Label>
                             </FormItem>
                           </RadioGroup>
                         </FormControl>
@@ -243,18 +244,18 @@ export function SurveyForm() {
                 )}
 
                 {currentStep === 2 && motivationalMessage && ( 
-                  <div className="text-center space-y-6 p-4 border border-primary rounded-lg bg-primary/10">
-                    <p className="text-xl font-semibold text-primary-foreground bg-primary p-3 rounded-md shadow-md">{motivationalMessage}</p>
-                    <p className="text-muted-foreground">Ready to make it official?</p>
+                  <div className="text-center space-y-6 p-4 border border-primary/50 rounded-lg bg-primary/10">
+                     <p className="text-xl font-semibold text-primary-foreground bg-primary p-3 rounded-md shadow-md">{motivationalMessage}</p>
+                    <p className="text-muted-foreground">Prêt à officialiser ?</p>
                   </div>
                 )}
 
                 {currentStep === 3 && ( 
                    <div className="text-center space-y-6">
-                    <h2 className="text-3xl font-bold font-headline text-primary">Survey Complete!</h2>
-                    <p className="text-xl">Thank you for your time and valuable input. We've recorded your response.</p>
+                    <h2 className="text-3xl font-bold font-headline text-primary">Sondage Terminé !</h2>
+                    <p className="text-xl">Merci pour votre temps et votre précieuse contribution. Nous avons enregistré votre réponse.</p>
                     <Button onClick={() => router.push('/results')} className="bg-accent hover:bg-accent/90 text-accent-foreground">
-                      See Team Responses
+                      Voir les Réponses de l'Équipe
                     </Button>
                   </div>
                 )}
@@ -266,26 +267,28 @@ export function SurveyForm() {
       <CardFooter className="flex justify-between pt-6">
         {currentStep > 0 && currentStep < 3 && (
           <Button variant="outline" onClick={handleBack} disabled={isLoading || isSubmitting}>
-            <ChevronLeft className="mr-2 h-4 w-4" /> Back
+            <ChevronLeft className="mr-2 h-4 w-4" /> Retour
           </Button>
         )}
         {currentStep === 0 && (
            <Button onClick={handleNext} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
-            Let's Go! <PlayCircle className="ml-2 h-5 w-5" />
+            C'est Parti ! <PlayCircle className="ml-2 h-5 w-5" />
           </Button>
         )}
         {currentStep === 1 && (
           <Button onClick={handleNext} disabled={isLoading} className="ml-auto bg-primary hover:bg-primary/90 text-primary-foreground">
             {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ChevronRight className="mr-2 h-4 w-4" />}
-            Next
+            Suivant
           </Button>
         )}
         {currentStep === 2 && (
           <Button type="submit" onClick={form.handleSubmit(onSubmit)} disabled={isSubmitting} className="w-full bg-accent hover:bg-accent/90 text-accent-foreground">
             {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
-            Submit & Finish
+            Soumettre & Terminer
           </Button>
         )}
+        {/* Placeholder for footer to maintain space if no buttons are visible */}
+        {currentStep === 3 && <div className="h-10"></div>} 
       </CardFooter>
     </Card>
   );
