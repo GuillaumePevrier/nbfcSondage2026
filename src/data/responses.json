@@ -1,36 +1,43 @@
+
 {
-  "Guillaume P.": {
-    "playerName": "Guillaume P.",
-    "surveyCompleted": true,
-    "continues": false,
-    "timestamp": "2025-06-13T17:40:08.034Z",
-    "motivationalMessage": "Guillaume, we're thrilled to have you back next season! Keep pushing yourself and striving for excellence on the court. Your dedication makes a real difference to the team."
-  },
-  "Antoine G.": {
-    "playerName": "Antoine G.",
+  "Rom Savatte": {
+    "playerName": "Rom Savatte",
     "surveyCompleted": false
   },
-  "Kylian M.": {
-    "playerName": "Kylian M.",
-    "surveyCompleted": true,
-    "continues": true,
-    "timestamp": "2025-06-13T17:39:27.592Z",
-    "motivationalMessage": "Kylian, we're thrilled you're staying with the team! Keep pushing your limits and strive for greatness this season. Your dedication inspires us all!"
-  },
-  "Zinedine Z.": {
-    "playerName": "Zinedine Z.",
+  "Vincent Poilvet": {
+    "playerName": "Vincent Poilvet",
     "surveyCompleted": false
   },
-  "Michel P.": {
-    "playerName": "Michel P.",
+  "Drd Julien": {
+    "playerName": "Drd Julien",
     "surveyCompleted": false
   },
-  "Lilian T.": {
-    "playerName": "Lilian T.",
+  "Germain Mqn": {
+    "playerName": "Germain Mqn",
     "surveyCompleted": false
   },
-  "Didier D.": {
-    "playerName": "Didier D.",
+  "Jérémy Aubert": {
+    "playerName": "Jérémy Aubert",
+    "surveyCompleted": false
+  },
+  "Nicolas Beillard": {
+    "playerName": "Nicolas Beillard",
+    "surveyCompleted": false
+  },
+  "Dimitri Hudin": {
+    "playerName": "Dimitri Hudin",
+    "surveyCompleted": false
+  },
+  "Yann Uvy": {
+    "playerName": "Yann Uvy",
+    "surveyCompleted": false
+  },
+  "Yoann Poulain": {
+    "playerName": "Yoann Poulain",
+    "surveyCompleted": false
+  },
+  "Léo Briantais": {
+    "playerName": "Léo Briantais",
     "surveyCompleted": false
   }
 }
