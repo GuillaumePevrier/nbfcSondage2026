@@ -70,7 +70,7 @@ export function SurveyForm() {
     },
   });
 
-  useEffect(()_ => {
+  useEffect(() => {
     if (prefilledPlayerName) {
       form.setValue('playerName', prefilledPlayerName);
     }
