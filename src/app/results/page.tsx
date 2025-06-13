@@ -8,7 +8,7 @@ import { getPlayerResponses } from '@/actions/surveyActions';
 import { players as allPlayersList } from '@/lib/players';
 import type { PlayerResponse } from '@/lib/players';
 import { SiteHeader } from '@/components/site-header';
-import { CheckCircle2, XCircle, Hourglass, MessageSquare, Users, ThumbsUp, ThumbsDown, Goal, PartyPopper, ShieldCheck, ShieldAlert } from 'lucide-react';
+import { CheckCircle2, XCircle, Hourglass, MessageSquare, Users, ThumbsUp, ThumbsDown, Goal, PartyPopper, ShieldCheck } from 'lucide-react';
 import Image from 'next/image';
 
 export default async function ResultsPage() {
@@ -148,58 +148,70 @@ export default async function ResultsPage() {
           </CardContent>
         </Card>
         
-        <Card className="shadow-xl">
-          <CardHeader>
-            <CardTitle className="font-headline text-3xl">Réponses Détaillées</CardTitle>
-            <CardDescription>
-              Aperçu des décisions des joueurs et messages de motivation.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nom du Joueur</TableHead>
-                    <TableHead>Décision</TableHead>
-                    <TableHead>Date de Réponse</TableHead>
-                    <TableHead>Message de Motivation</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {displayData.map((playerData) => (
-                    <TableRow key={playerData.name}>
-                      <TableCell className="font-medium">{playerData.name}</TableCell>
-                      <TableCell>
-                        {!playerData.surveyCompleted ? (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
-                            <Hourglass className="w-4 h-4 mr-1.5" /> En attente
-                          </span>
-                        ) : playerData.continues ? (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                            <CheckCircle2 className="w-4 h-4 mr-1.5" /> Continue
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
-                            <XCircle className="w-4 h-4 mr-1.5" /> Ne continue pas
-                          </span>
-                        )}
-                      </TableCell>
-                      <TableCell>{playerData.timestamp}</TableCell>
-                      <TableCell className="max-w-xs">
-                        {playerData.motivationalMessage ? (
-                           <div className="flex items-start space-x-2" title={playerData.motivationalMessage}>
-                            <MessageSquare className="w-4 h-4 mt-0.5 text-muted-foreground flex-shrink-0" /> 
-                            <span className="italic text-sm text-muted-foreground truncate hover:text-wrap hover:overflow-visible">{playerData.motivationalMessage}</span>
-                          </div>
-                        ) : '-'}
-                      </TableCell>
+        <Card className="shadow-xl relative overflow-hidden">
+          <div
+            className="absolute inset-0 z-0"
+            style={{
+              backgroundImage: "url('/images/background-survey.jpg')",
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              opacity: 0.1, 
+            }}
+            data-ai-hint="futsal game action"
+          ></div>
+          <div className="relative z-10">
+            <CardHeader>
+              <CardTitle className="font-headline text-3xl">Réponses Détaillées</CardTitle>
+              <CardDescription>
+                Aperçu des décisions des joueurs et messages de motivation.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Nom du Joueur</TableHead>
+                      <TableHead>Décision</TableHead>
+                      <TableHead>Date de Réponse</TableHead>
+                      <TableHead>Message de Motivation</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
+                  </TableHeader>
+                  <TableBody>
+                    {displayData.map((playerData) => (
+                      <TableRow key={playerData.name}>
+                        <TableCell className="font-medium">{playerData.name}</TableCell>
+                        <TableCell>
+                          {!playerData.surveyCompleted ? (
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                              <Hourglass className="w-4 h-4 mr-1.5" /> En attente
+                            </span>
+                          ) : playerData.continues ? (
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                              <CheckCircle2 className="w-4 h-4 mr-1.5" /> Continue
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                              <XCircle className="w-4 h-4 mr-1.5" /> Ne continue pas
+                            </span>
+                          )}
+                        </TableCell>
+                        <TableCell>{playerData.timestamp}</TableCell>
+                        <TableCell className="max-w-xs">
+                          {playerData.motivationalMessage ? (
+                            <div className="flex items-start space-x-2" title={playerData.motivationalMessage}>
+                              <MessageSquare className="w-4 h-4 mt-0.5 text-muted-foreground flex-shrink-0" /> 
+                              <span className="italic text-sm text-muted-foreground truncate hover:text-wrap hover:overflow-visible">{playerData.motivationalMessage}</span>
+                            </div>
+                          ) : '-'}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </div>
         </Card>
         <div className="mt-8 text-center">
           <Button asChild className="bg-accent hover:bg-accent/90 text-accent-foreground">
