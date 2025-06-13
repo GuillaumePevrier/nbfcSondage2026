@@ -22,7 +22,7 @@ export default async function HomePage() {
           <div className="container px-4 md:px-6 relative z-10">
             <div className="flex flex-col items-center space-y-4 text-center">
               <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl font-headline text-primary-foreground">
-                Avenir Futsal : Votre Avis Compte !
+                NBFC Futsal : Votre Avis !
               </h1>
               <p className="mx-auto max-w-[700px] text-primary-foreground/80 md:text-xl">
                 Aidez-nous à planifier la prochaine saison. Faites-nous savoir si vous continuez avec l'équipe.
