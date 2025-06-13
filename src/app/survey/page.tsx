@@ -3,6 +3,9 @@ import { Suspense } from 'react';
 import { SurveyForm } from '@/components/survey-form';
 import { SiteHeader } from '@/components/site-header';
 import { getAllPlayers, type Player } from '@/lib/players'; // Updated import
+import CountdownTimer from '@/components/countdown-timer';
+
+const TARGET_DATE_STRING = "2025-06-27T23:59:59";
 
 export default async function SurveyPage() {
   const playersList: Player[] = await getAllPlayers(); // Fetch players
@@ -22,6 +25,12 @@ export default async function SurveyPage() {
           <p className="text-balance text-center text-sm leading-loose text-muted-foreground md:text-left">
             Votre réponse aide à façonner l'avenir de notre équipe !
           </p>
+          <CountdownTimer 
+            targetDate={TARGET_DATE_STRING} 
+            className="text-muted-foreground" 
+            textClassName="text-sm"
+            iconClassName="h-4 w-4"
+          />
         </div>
       </footer>
     </>

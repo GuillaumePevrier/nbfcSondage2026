@@ -30,15 +30,6 @@ export function MobileNav() {
                 <Image src="/logo.png" alt="Logo NBFC Futsal Club" width={50} height={50} />
                  <span className="font-bold text-lg font-headline">NBFC Futsal</span>
               </Link>
-              <div className="mt-2 text-center">
-                 <span className="text-xs text-muted-foreground font-medium">Fin du sondage :</span>
-                <CountdownTimer 
-                  targetDate={TARGET_DATE_STRING} 
-                  className="text-card-foreground justify-center" 
-                  textClassName="text-sm tracking-normal"
-                  iconClassName="h-4 w-4"
-                />
-              </div>
             </div>
             <nav className="flex-1 p-4 space-y-1.5">
               <SheetClose asChild>
@@ -66,7 +57,16 @@ export function MobileNav() {
                  />
               </SheetClose>
             </nav>
-            <div className="p-4 border-t mt-auto">
+            <div className="p-4 border-t mt-auto space-y-3">
+              <div className="text-center">
+                 <span className="text-xs text-muted-foreground font-medium">Fin du sondage :</span>
+                <CountdownTimer 
+                  targetDate={TARGET_DATE_STRING} 
+                  className="text-card-foreground justify-center" 
+                  textClassName="text-sm tracking-normal"
+                  iconClassName="h-4 w-4"
+                />
+              </div>
               <p className="text-xs text-muted-foreground text-center">
                 © {new Date().getFullYear()} NBFC Futsal Club
               </p>

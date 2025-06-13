@@ -4,9 +4,6 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { MobileNav } from './mobile-nav'; // Import the mobile navigation
 import { AddPlayerDialog } from './add-player-dialog'; // Import the dialog
-import CountdownTimer from './countdown-timer';
-
-const TARGET_DATE_STRING = "2025-06-27T23:59:59";
 
 export function SiteHeader() {
   return (
@@ -16,18 +13,7 @@ export function SiteHeader() {
           <Image src="/logo.png" alt="Logo NBFC Futsal Club" width={60} height={60} className="rounded-sm" />
         </Link>
         
-        {/* Desktop Countdown Timer - Centered */}
-        <div className="hidden md:flex flex-col items-center justify-center absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-          <span className="text-xs text-muted-foreground font-medium">Fin du sondage dans :</span>
-          <CountdownTimer 
-            targetDate={TARGET_DATE_STRING} 
-            className="text-primary-foreground" 
-            textClassName="text-base lg:text-lg tracking-wider"
-            iconClassName="h-5 w-5" 
-          />
-        </div>
-
-        <nav className="hidden md:flex items-center justify-end space-x-1 sm:space-x-2">
+        <nav className="hidden md:flex items-center justify-end space-x-1 sm:space-x-2 ml-auto"> {/* Added ml-auto to push nav to the right */}
           <Button variant="ghost" asChild>
             <Link href="/">Accueil</Link>
           </Button>
@@ -41,7 +27,8 @@ export function SiteHeader() {
         </nav>
 
         <div className="md:hidden flex items-center">
-          <MobileNav />
+          {/* ml-auto can be added here if MobileNav trigger needs to be on the far right and there's other content */}
+          <MobileNav /> 
         </div>
       </div>
     </header>

@@ -7,6 +7,9 @@ import { getPlayerResponses } from '@/actions/surveyActions';
 import { getAllPlayers, type Player } from '@/lib/players'; // Updated import
 import { SiteHeader } from '@/components/site-header';
 import { CheckCircle2, XCircle, Hourglass, Edit3 } from 'lucide-react';
+import CountdownTimer from '@/components/countdown-timer';
+
+const TARGET_DATE_STRING = "2025-06-27T23:59:59";
 
 export default async function HomePage() {
   const responses = await getPlayerResponses();
@@ -107,6 +110,12 @@ export default async function HomePage() {
           <p className="text-balance text-center text-sm leading-loose text-muted-foreground md:text-left">
             Construit pour l'amour du Futsal. © {new Date().getFullYear()} NBFC Futsal Club
           </p>
+          <CountdownTimer 
+            targetDate={TARGET_DATE_STRING} 
+            className="text-muted-foreground" 
+            textClassName="text-sm"
+            iconClassName="h-4 w-4"
+          />
         </div>
       </footer>
     </>
