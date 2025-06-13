@@ -17,12 +17,11 @@ export default async function HomePage() {
       <SiteHeader />
       <main className="flex-1">
         <section 
-          className="relative w-full py-12 md:py-24 lg:py-32 xl:py-48 bg-cover bg-center"
-          style={{ backgroundImage: "url('/images/hero-home.jpg')" }}
-          data-ai-hint="futsal stadium lights"
+          className="relative w-full py-12 md:py-24 lg:py-32 xl:py-48" 
+          // Removed backgroundImage style and data-ai-hint from here as global background is used
         >
-          <div className="absolute inset-0 bg-black/60"></div>
-          <div className="container px-4 md:px-6 relative z-10">
+          {/* Removed overlay div as global overlay is used */}
+          <div className="container px-4 md:px-6 relative z-10"> {/* Ensure content is above global overlay if any was local */}
             <div className="flex flex-col items-center space-y-4 text-center">
               <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl font-headline text-primary-foreground">
                 Avenir Futsal : Votre Avis Compte !

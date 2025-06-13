@@ -54,12 +54,11 @@ export default async function ResultsPage() {
       <SiteHeader />
       <main className="flex-1 p-4 md:p-8">
         <section 
-          className="relative w-full py-16 md:py-24 bg-cover bg-center mb-8 rounded-lg shadow-lg"
-          style={{ backgroundImage: "url('/images/hero-results.jpg')" }}
-          data-ai-hint="futsal stadium crowd"
+          className="relative w-full py-16 md:py-24 mb-8 rounded-lg shadow-lg"
+          // Removed backgroundImage style and data-ai-hint from here as global background is used
         >
-          <div className="absolute inset-0 bg-black/60 rounded-lg"></div>
-          <div className="container px-4 md:px-6 relative z-10 text-center">
+          {/* Removed overlay div as global overlay is used */}
+          <div className="container px-4 md:px-6 relative z-10 text-center"> {/* Ensure content is above global overlay */}
             <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl font-headline text-primary-foreground">
               Aperçu des Décisions de l'Équipe
             </h1>
@@ -149,17 +148,8 @@ export default async function ResultsPage() {
         </Card>
         
         <Card className="shadow-xl relative overflow-hidden">
-          <div
-            className="absolute inset-0 z-0"
-            style={{
-              backgroundImage: "url('/images/background-survey.jpg')",
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              opacity: 0.1, 
-            }}
-            data-ai-hint="futsal game action"
-          ></div>
-          <div className="relative z-10">
+          {/* Removed local background image div as global background is used */}
+          <div className="relative z-10"> {/* Ensure content is above global overlay if any was local */}
             <CardHeader>
               <CardTitle className="font-headline text-3xl">Réponses Détaillées</CardTitle>
               <CardDescription>

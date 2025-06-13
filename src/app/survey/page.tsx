@@ -7,16 +7,9 @@ export default function SurveyPage() {
   return (
     <>
       <SiteHeader />
-      <main className="flex-1 flex flex-col items-center justify-center p-4 md:p-8 relative overflow-hidden">
-        <Image 
-          src="/images/background-survey.jpg" 
-          alt="Arrière-plan action Futsal"
-          layout="fill"
-          objectFit="cover"
-          className="absolute inset-0 z-0 opacity-20" /* Reduced opacity */
-          data-ai-hint="futsal game action"
-        />
-        <div className="relative z-10 w-full max-w-2xl">
+      <main className="flex-1 flex flex-col items-center justify-center p-4 md:p-8 relative">
+        {/* Removed Image component as global background is used */}
+        <div className="relative z-10 w-full max-w-2xl"> {/* Ensure content is above global overlay */}
           <Suspense fallback={<div>Chargement du sondage...</div>}>
             <SurveyForm />
           </Suspense>

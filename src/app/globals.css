@@ -57,10 +57,10 @@ body {
   }
 
   .dark {
-    --background: 225 40% 8%; /* Very Dark Blue */
+    --background: 225 40% 8%; /* Very Dark Blue - This will be less prominent due to global bg image */
     --foreground: 40 30% 95%; /* Creamy White */
 
-    --card: 225 35% 12%; /* Slightly Lighter Dark Blue for cards */
+    --card: 225 35% 12%; /* Slightly Lighter Dark Blue for cards - will sit on image */
     --card-foreground: 40 30% 95%;
 
     --popover: 225 35% 12%;
@@ -119,6 +119,7 @@ body {
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    /* @apply bg-background text-foreground; Removed bg-background */
+    @apply text-foreground;
   }
 }
