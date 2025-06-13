@@ -27,7 +27,7 @@ export default function RootLayout({
             style={{ backgroundImage: "url('/images/background-survey.jpg')" }}
             data-ai-hint="futsal game action"
           >
-            <div className="bg-black/60 min-h-screen flex flex-col"> {/* Overlay opacity reduced from 75 to 60 */}
+            <div className="bg-black/40 min-h-screen flex flex-col"> {/* Overlay opacity reduced from 60 to 40 */}
               <div className="flex-1 flex flex-col">
                 {children}
               </div>
