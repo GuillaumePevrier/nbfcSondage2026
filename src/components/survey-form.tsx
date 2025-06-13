@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -16,8 +17,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { players, type SurveyFormData } from '@/lib/players';
 import { getAIMotivationalMessageAction, finalizeSurveyAction } from '@/actions/surveyActions';
-import { Futbol, PlayCircle, ChevronLeft, ChevronRight, Send, Loader2, Smile, Frown } from 'lucide-react';
-import Image from 'next/image';
+import { Dribbble, PlayCircle, ChevronLeft, ChevronRight, Send, Loader2, Smile, Frown } from 'lucide-react';
 
 const formSchema = z.object({
   playerName: z.string().min(1, 'Player name is required.'),
@@ -27,10 +27,10 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 const steps = [
-  { id: 'welcome', title: 'Welcome!', bgHint: "futsal court lines" },
-  { id: 'decision', title: 'Your Plans?', bgHint: "futsal team huddle" },
-  { id: 'motivation', title: 'A Little Boost!', bgHint: "futsal goal celebration" },
-  { id: 'complete', title: 'Thank You!', bgHint: "futsal handshake respect" },
+  { id: 'welcome', title: 'Welcome!' },
+  { id: 'decision', title: 'Your Plans?' },
+  { id: 'motivation', title: 'A Little Boost!' },
+  { id: 'complete', title: 'Thank You!' },
 ];
 
 const slideVariants = {
@@ -118,17 +118,15 @@ export function SurveyForm() {
       const result = await finalizeSurveyAction(surveyData, motivationalMessage);
 
       if (result.success && result.data) {
-        // Send email using EmailJS
         const emailParams = {
-          to_name: 'Team Manager', // Or specific name
+          to_name: 'Team Manager',
           from_name: data.playerName,
           player_name: data.playerName,
           decision: data.willContinue === 'yes' ? 'Continuing next season' : 'Not continuing next season',
           motivational_message: motivationalMessage,
-          reply_to: 'no-reply@futsalfuture.com', // Optional
+          reply_to: 'no-reply@futsalfuture.com',
         };
         
-        // IMPORTANT: Replace with your actual EmailJS service ID, template ID, and Public Key
         const EMAILJS_SERVICE_ID = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || 'YOUR_EMAILJS_SERVICE_ID';
         const EMAILJS_TEMPLATE_ID = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID || 'YOUR_EMAILJS_TEMPLATE_ID';
         const EMAILJS_PUBLIC_KEY = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || 'YOUR_EMAILJS_PUBLIC_KEY';
@@ -141,7 +139,7 @@ export function SurveyForm() {
             toast({ title: 'Survey Submitted!', description: 'Your response has been recorded and an email sent.' });
         }
         
-        setCurrentStep((prev) => prev + 1); // Move to thank you/complete step
+        setCurrentStep((prev) => prev + 1);
       } else {
         toast({ title: 'Submission Failed', description: result.error || 'Could not save your response.', variant: 'destructive' });
       }
@@ -159,12 +157,12 @@ export function SurveyForm() {
     <Card className="w-full shadow-2xl bg-card/90 backdrop-blur-sm">
       <CardHeader className="text-center">
         <div className="flex justify-center mb-4">
-          <Futbol className="w-12 h-12 text-primary" />
+          <Dribbble className="w-12 h-12 text-primary" />
         </div>
         <CardTitle className="font-headline text-4xl">{currentStepDetails.title}</CardTitle>
         {currentStep === 0 && <CardDescription className="text-lg">Help us plan for an amazing next season!</CardDescription>}
       </CardHeader>
-      <CardContent className="min-h-[300px] flex items-center justify-center overflow-hidden">
+      <CardContent className="min-h-[300px] flex items-center justify-center overflow-hidden p-6">
         <AnimatePresence initial={false} custom={direction} mode="wait">
           <motion.div
             key={currentStep}
@@ -177,32 +175,16 @@ export function SurveyForm() {
           >
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                {currentStep === 0 && ( // Welcome Step
+                {currentStep === 0 && ( 
                   <div className="text-center space-y-6">
-                    <Image 
-                      src={`https://placehold.co/600x300.png`}
-                      alt="Futsal court"
-                      width={600}
-                      height={300}
-                      className="rounded-lg mx-auto shadow-lg"
-                      data-ai-hint={currentStepDetails.bgHint}
-                    />
                     <p className="text-xl">
                       Your input is crucial for our team's success. This quick survey will help us understand your availability for the upcoming Futsal season.
                     </p>
                   </div>
                 )}
 
-                {currentStep === 1 && ( // Decision Step
-                <>
-                  <Image 
-                    src={`https://placehold.co/600x300.png`}
-                    alt="Futsal team"
-                    width={600}
-                    height={300}
-                    className="rounded-lg mx-auto shadow-lg mb-6"
-                    data-ai-hint={currentStepDetails.bgHint}
-                  />
+                {currentStep === 1 && ( 
+                <div className="space-y-6">
                   <FormField
                     control={form.control}
                     name="playerName"
@@ -257,34 +239,18 @@ export function SurveyForm() {
                       </FormItem>
                     )}
                   />
-                </>  
+                </div>  
                 )}
 
-                {currentStep === 2 && motivationalMessage && ( // Motivation Step
+                {currentStep === 2 && motivationalMessage && ( 
                   <div className="text-center space-y-6 p-4 border border-primary rounded-lg bg-primary/10">
-                     <Image 
-                        src={`https://placehold.co/600x300.png`}
-                        alt="Futsal celebration"
-                        width={600}
-                        height={300}
-                        className="rounded-lg mx-auto shadow-lg"
-                        data-ai-hint={currentStepDetails.bgHint}
-                      />
                     <p className="text-xl font-semibold text-primary-foreground bg-primary p-3 rounded-md shadow-md">{motivationalMessage}</p>
                     <p className="text-muted-foreground">Ready to make it official?</p>
                   </div>
                 )}
 
-                {currentStep === 3 && ( // Complete Step
+                {currentStep === 3 && ( 
                    <div className="text-center space-y-6">
-                     <Image 
-                        src={`https://placehold.co/600x300.png`}
-                        alt="Futsal respect"
-                        width={600}
-                        height={300}
-                        className="rounded-lg mx-auto shadow-lg"
-                        data-ai-hint={currentStepDetails.bgHint}
-                      />
                     <h2 className="text-3xl font-bold font-headline text-primary">Survey Complete!</h2>
                     <p className="text-xl">Thank you for your time and valuable input. We've recorded your response.</p>
                     <Button onClick={() => router.push('/results')} className="bg-accent hover:bg-accent/90 text-accent-foreground">
@@ -309,7 +275,7 @@ export function SurveyForm() {
           </Button>
         )}
         {currentStep === 1 && (
-          <Button onClick={handleNext} disabled={isLoading} className="bg-primary hover:bg-primary/90 text-primary-foreground">
+          <Button onClick={handleNext} disabled={isLoading} className="ml-auto bg-primary hover:bg-primary/90 text-primary-foreground">
             {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ChevronRight className="mr-2 h-4 w-4" />}
             Next
           </Button>
