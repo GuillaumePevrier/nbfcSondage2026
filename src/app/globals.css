@@ -3,38 +3,38 @@
 @tailwind utilities;
 
 body {
-  font-family: 'Alegreya', serif; /* Consistent with tailwind.config.ts */
+  font-family: 'Oswald', sans-serif; /* Changed from Alegreya to Oswald */
 }
 
 @layer base {
   :root {
-    --background: 40 43% 95%; /* Lighter Cream */
-    --foreground: 225 43% 18%; /* Dark Blue (slightly darker for text) */
+    --background: 40 43% 95%; 
+    --foreground: 225 43% 18%;
 
-    --card: 40 43% 92%; /* Cream for cards */
+    --card: 40 43% 92%; 
     --card-foreground: 225 43% 18%;
 
     --popover: 40 43% 92%;
     --popover-foreground: 225 43% 18%;
 
-    --primary: 225 43% 21%; /* Dark Blue from logo */
-    --primary-foreground: 40 43% 95%; /* Lighter Cream for text on primary */
+    --primary: 225 43% 21%; 
+    --primary-foreground: 40 43% 95%;
 
-    --secondary: 185 45% 59%; /* Light Blue/Teal from logo */
-    --secondary-foreground: 225 43% 18%; /* Dark Blue for text on secondary */
+    --secondary: 185 45% 59%; 
+    --secondary-foreground: 225 43% 18%;
 
-    --muted: 225 30% 85%; /* Lighter shade of dark blue/grey */
-    --muted-foreground: 225 30% 45%; /* Darker muted text */
+    --muted: 225 30% 85%; 
+    --muted-foreground: 225 30% 45%;
 
-    --accent: 0 68% 54%; /* Red from logo */
-    --accent-foreground: 40 43% 95%; /* Lighter Cream for text on accent */
+    --accent: 0 68% 54%; 
+    --accent-foreground: 40 43% 95%; 
     
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
     
-    --border: 225 30% 75%; /* Muted dark blue for borders */
-    --input: 225 30% 90%; /* Very light blue/grey for input backgrounds */
-    --ring: 0 68% 54%; /* Red for focus rings */
+    --border: 225 30% 75%; 
+    --input: 225 30% 90%; 
+    --ring: 0 68% 54%; 
     
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
@@ -43,61 +43,76 @@ body {
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
 
-    /* Sidebar colors adapted to the new theme */
-    --sidebar-background: 225 43% 18%; /* Dark Blue from logo for sidebar */
-    --sidebar-foreground: 40 43% 90%; /* Cream for sidebar text */
-    --sidebar-primary: 0 68% 60%; /* Red for sidebar primary elements */
+    --sidebar-background: 225 43% 18%;
+    --sidebar-foreground: 40 43% 90%; 
+    --sidebar-primary: 0 68% 60%; 
     --sidebar-primary-foreground: 40 43% 95%;
-    --sidebar-accent: 225 43% 25%; /* Slightly lighter Dark Blue for sidebar accents */
+    --sidebar-accent: 225 43% 25%; 
     --sidebar-accent-foreground: 40 43% 95%;
     --sidebar-border: 225 43% 30%;
     --sidebar-ring: 0 68% 54%;
+
+    /* Default to no animation for border hue */
+    --border-cycle-hue: 225; /* Default non-animated border hue for light mode */
   }
+
   .dark {
-    --background: 225 43% 10%; /* Darkest Blue */
-    --foreground: 40 43% 90%; /* Cream */
+    --background: 225 40% 8%; /* Very Dark Blue */
+    --foreground: 40 30% 95%; /* Creamy White */
 
-    --card: 225 43% 15%; 
-    --card-foreground: 40 43% 90%;
+    --card: 225 35% 12%; /* Slightly Lighter Dark Blue for cards */
+    --card-foreground: 40 30% 95%;
 
-    --popover: 225 43% 15%;
-    --popover-foreground: 40 43% 90%;
+    --popover: 225 35% 12%;
+    --popover-foreground: 40 30% 95%;
 
-    --primary: 0 68% 54%; /* Red as primary in dark */
-    --primary-foreground: 40 43% 95%; 
+    --primary: 0 70% 58%; /* Red from logo */
+    --primary-foreground: 0 0% 100%; /* White text on Red */
 
-    --secondary: 185 45% 50%; /* Slightly darker Teal */
-    --secondary-foreground: 225 43% 10%;
+    --secondary: 185 50% 55%; /* Teal from logo */
+    --secondary-foreground: 225 40% 8%; /* Dark Blue text on Teal */
 
-    --accent: 185 45% 59%; /* Teal as accent */
-    --accent-foreground: 225 43% 10%;
+    --muted: 225 25% 20%; /* Muted Dark Blue */
+    --muted-foreground: 225 25% 65%; /* Lighter Muted Text */
 
-    --muted: 225 30% 22%;
-    --muted-foreground: 225 30% 70%;
-
+    --accent: 185 60% 65%; /* Lighter Teal or distinct accent */
+    --accent-foreground: 225 40% 8%; 
+    
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
+    
+    /* Animated border for dark mode */
+    --border-cycle-hue: 0; /* Initial hue for animation, will be overridden by keyframes */
+    --border: hsl(var(--border-cycle-hue), 70%, 55%); /* Saturation and Lightness for good visibility */
+    
+    --input: 225 30% 18%; /* Dark Input Background */
+    --ring: 0 70% 58%; /* Red for focus rings */
+    
+    --chart-1: 0 70% 58%;   /* Red */
+    --chart-2: 185 50% 55%; /* Teal */
+    --chart-3: 225 40% 60%; /* Blue */
+    --chart-4: 40 80% 70%;  /* Light Cream/Yellow */
+    --chart-5: 27 87% 67%;
 
-    --border: 225 30% 25%;
-    --input: 225 30% 20%;
-    --ring: 0 68% 54%; 
+    --sidebar-background: 225 40% 6%; /* Even Darker Blue for Sidebar */
+    --sidebar-foreground: 40 30% 90%;
+    --sidebar-primary: 0 70% 58%; 
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 225 35% 15%;
+    --sidebar-accent-foreground: 40 30% 95%;
+    --sidebar-border: hsl(var(--border-cycle-hue), 50%, 40%); /* Use animated hue for sidebar border too */
+    --sidebar-ring: 0 70% 58%;
 
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-
-    --sidebar-background: 225 43% 8%; 
-    --sidebar-foreground: 40 43% 90%;
-    --sidebar-primary: 0 68% 54%;
-    --sidebar-primary-foreground: 40 43% 95%;
-    --sidebar-accent: 225 43% 12%;
-    --sidebar-accent-foreground: 40 43% 95%;
-    --sidebar-border: 225 43% 20%;
-    --sidebar-ring: 0 68% 54%;
+    animation: border-color-cycle-animation 10s linear infinite;
   }
 }
+
+@keyframes border-color-cycle-animation { /* Corrected keyframe name */
+  0%, 100% { --border-cycle-hue: 0; } /* Red */
+  33%  { --border-cycle-hue: 185; }  /* Teal */
+  66%  { --border-cycle-hue: 225; }  /* Blue */
+}
+
 
 @layer base {
   * {

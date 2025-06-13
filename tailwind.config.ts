@@ -10,8 +10,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        body: ['Alegreya', 'serif'],
-        headline: ['Belleza', 'sans-serif'],
+        body: ['Oswald', 'sans-serif'],
+        headline: ['Graduate', 'serif'], // Changed from Belleza to Graduate
         code: ['monospace'],
       },
       colors: {
@@ -88,10 +88,16 @@ export default {
             height: '0',
           },
         },
+        'border-color-cycle': { /* Renamed for clarity */
+          '0%, 100%': { '--border-cycle-hue': '0' }, /* Red */
+          '33%': { '--border-cycle-hue': '185' },  /* Teal */
+          '66%': { '--border-cycle-hue': '225' },  /* Blue */
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        'border-cycle': 'border-color-cycle 10s linear infinite', /* Renamed for clarity */
       },
     },
   },
