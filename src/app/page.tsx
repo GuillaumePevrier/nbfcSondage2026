@@ -25,7 +25,7 @@ export default async function HomePage() {
                 NBFC Futsal : Votre Avis !
               </h1>
               <p className="mx-auto max-w-[700px] text-primary-foreground/80 md:text-xl">
-                Aidez-nous à planifier la prochaine saison. Faites-nous savoir si vous continuez avec l'équipe.
+                Planifions la prochaine saison ! Dites-nous si vous continuez avec l'équipe.
               </p>
               <div className="space-x-4">
                 <Button size="lg" asChild className="bg-primary hover:bg-primary/90 text-primary-foreground">
