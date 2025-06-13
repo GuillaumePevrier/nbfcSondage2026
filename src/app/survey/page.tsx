@@ -9,7 +9,7 @@ export default function SurveyPage() {
       <SiteHeader />
       <main className="flex-1 flex flex-col items-center justify-center p-4 md:p-8 relative overflow-hidden">
         <Image 
-          src="https://placehold.co/1920x1080.png" 
+          src="/images/background-survey.jpg" 
           alt="Arrière-plan action Futsal"
           layout="fill"
           objectFit="cover"

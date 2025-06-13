@@ -18,7 +18,7 @@ export default async function HomePage() {
       <main className="flex-1">
         <section 
           className="relative w-full py-12 md:py-24 lg:py-32 xl:py-48 bg-cover bg-center"
-          style={{ backgroundImage: "url('https://placehold.co/1920x1080.png')" }}
+          style={{ backgroundImage: "url('/images/hero-home.jpg')" }}
           data-ai-hint="futsal stadium lights"
         >
           <div className="absolute inset-0 bg-black/60"></div>

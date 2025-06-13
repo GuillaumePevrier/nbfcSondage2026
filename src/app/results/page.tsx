@@ -55,7 +55,7 @@ export default async function ResultsPage() {
       <main className="flex-1 p-4 md:p-8">
         <section 
           className="relative w-full py-16 md:py-24 bg-cover bg-center mb-8 rounded-lg shadow-lg"
-          style={{ backgroundImage: "url('https://placehold.co/1200x400.png')" }}
+          style={{ backgroundImage: "url('/images/hero-results.jpg')" }}
           data-ai-hint="futsal stadium crowd"
         >
           <div className="absolute inset-0 bg-black/60 rounded-lg"></div>
