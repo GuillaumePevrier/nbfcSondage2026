@@ -15,6 +15,16 @@ export const players: Player[] = [
   { id: '8', name: 'Yann Uvy' },
   { id: '9', name: 'Yoann Poulain' },
   { id: '10', name: 'Léo Briantais' },
+  { id: '11', name: 'Mathieu Lefevre' },
+  { id: '12', name: 'David Moreau' },
+  { id: '13', name: 'Julien Girard' },
+  { id: '14', name: 'Alexandre Petit' },
+  { id: '15', name: 'Thomas Dubois' },
+  { id: '16', name: 'Sébastien Roux' },
+  { id: '17', name: 'Guillaume Lambert' },
+  { id: '18', name: 'Anthony Mercier' },
+  { id: '19', name: 'Christophe Simon' },
+  { id: '20', name: 'Frédéric Royer' },
 ];
 
 export type SurveyFormData = {
