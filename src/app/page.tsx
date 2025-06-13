@@ -1,16 +1,16 @@
+
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { getPlayerResponses } from '@/actions/surveyActions';
-import { players, type Player } from '@/lib/players';
+import { getAllPlayers, type Player } from '@/lib/players'; // Updated import
 import { SiteHeader } from '@/components/site-header';
 import { CheckCircle2, XCircle, Hourglass, Edit3 } from 'lucide-react';
-import Image from 'next/image';
 
 export default async function HomePage() {
   const responses = await getPlayerResponses();
-  const allPlayers = players; 
+  const allPlayers = await getAllPlayers(); // Fetch players dynamically
 
   return (
     <>
@@ -18,10 +18,8 @@ export default async function HomePage() {
       <main className="flex-1">
         <section 
           className="relative w-full py-12 md:py-24 lg:py-32 xl:py-48" 
-          // Removed backgroundImage style and data-ai-hint from here as global background is used
         >
-          {/* Removed overlay div as global overlay is used */}
-          <div className="container px-4 md:px-6 relative z-10"> {/* Ensure content is above global overlay if any was local */}
+          <div className="container px-4 md:px-6 relative z-10">
             <div className="flex flex-col items-center space-y-4 text-center">
               <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl font-headline text-primary-foreground">
                 Avenir Futsal : Votre Avis Compte !

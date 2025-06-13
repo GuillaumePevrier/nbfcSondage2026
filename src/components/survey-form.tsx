@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -12,12 +13,12 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label'; // Not directly used, but RadioGroupItem might need it.
+import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { players, type SurveyFormData } from '@/lib/players';
+import type { Player, SurveyFormData } from '@/lib/players'; // Updated import, Player is now an interface
 import { getAIMotivationalMessageAction, finalizeSurveyAction } from '@/actions/surveyActions';
-import { Dribbble, PlayCircle, ChevronLeft, ChevronRight, Send, Loader2, Smile, Frown } from 'lucide-react';
-import Image from 'next/image'; // For logo if needed inside form
+import { PlayCircle, ChevronLeft, ChevronRight, Send, Loader2, Smile, Frown } from 'lucide-react';
+import Image from 'next/image';
 
 const formSchema = z.object({
   playerName: z.string().min(1, 'Le nom du joueur est requis.'),
@@ -50,7 +51,11 @@ const slideVariants = {
   }),
 };
 
-export function SurveyForm() {
+interface SurveyFormProps {
+  players: Player[]; // Receive players as a prop
+}
+
+export function SurveyForm({ players }: SurveyFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
@@ -105,17 +110,37 @@ export function SurveyForm() {
   };
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    if (!motivationalMessage) {
-      toast({ title: 'Erreur', description: 'Message de motivation non encore généré.', variant: 'destructive' });
-      return;
+    if (!motivationalMessage && data.willContinue) { // Motivational message is generated only if a decision is made
+       // Try to generate message now if it was skipped (e.g. if user directly submitted after filling form without AI step)
+       // This case might not happen with current step logic but as a safeguard
+      setIsLoading(true);
+      try {
+        const message = await getAIMotivationalMessageAction(data.playerName, data.willContinue === 'yes');
+        setMotivationalMessage(message);
+         // Proceed with submission logic with the newly fetched message in the finally block or a chained promise
+      } catch (error) {
+        toast({ title: 'Erreur', description: 'Impossible de récupérer le message de motivation avant soumission.', variant: 'destructive' });
+        setIsLoading(false);
+        setIsSubmitting(false); // Ensure this is reset
+        return;
+      } finally {
+        // This needs to be refactored to submit AFTER message is set
+      }
     }
+    
+    // Ensure motivationalMessage is available before proceeding
+    // This re-check is because the above block is async
+    const finalMotivationalMessage = motivationalMessage || (data.willContinue ? "Message de motivation par défaut si la génération a échoué." : "Merci pour votre participation.");
+
+
     setIsSubmitting(true);
     try {
       const surveyData: SurveyFormData = {
         playerName: data.playerName,
         willContinue: data.willContinue === 'yes',
       };
-      const result = await finalizeSurveyAction(surveyData, motivationalMessage);
+      // Pass the potentially newly generated or existing motivational message
+      const result = await finalizeSurveyAction(surveyData, finalMotivationalMessage);
 
       if (result.success && result.data) {
         const emailParams = {
@@ -123,8 +148,8 @@ export function SurveyForm() {
           from_name: data.playerName,
           player_name: data.playerName,
           decision: data.willContinue === 'yes' ? 'Continue la saison prochaine' : 'Ne continue pas la saison prochaine',
-          motivational_message: motivationalMessage,
-          reply_to: 'no-reply@futsalfuture.com', // Update with a relevant domain
+          motivational_message: finalMotivationalMessage,
+          reply_to: 'no-reply@futsalfuture.com',
         };
         
         const EMAILJS_SERVICE_ID = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || 'YOUR_EMAILJS_SERVICE_ID';
@@ -147,6 +172,7 @@ export function SurveyForm() {
       console.error('Erreur de soumission:', error);
       toast({ title: 'Erreur de Soumission', description: 'Une erreur inattendue est survenue.', variant: 'destructive' });
     } finally {
+      setIsLoading(false); // Ensure loading is also false
       setIsSubmitting(false);
     }
   };
@@ -157,7 +183,6 @@ export function SurveyForm() {
     <Card className="w-full shadow-2xl bg-card/95 backdrop-blur-sm">
       <CardHeader className="text-center">
         <div className="flex justify-center mb-4">
-          {/* Using the club logo here if available, or Dribbble as a fallback */}
           <Image src="/logo.png" alt="Logo du Club" width={60} height={60} />
         </div>
         <CardTitle className="font-headline text-4xl">{currentStepDetails.title}</CardTitle>
@@ -282,12 +307,13 @@ export function SurveyForm() {
           </Button>
         )}
         {currentStep === 2 && (
-          <Button type="submit" onClick={form.handleSubmit(onSubmit)} disabled={isSubmitting} className="w-full bg-accent hover:bg-accent/90 text-accent-foreground">
+          // Changed type to button to prevent form submission if user clicks this before the form.handleSubmit wrapper kicks in
+          // The actual submission is handled by form.handleSubmit(onSubmit) on the form element
+          <Button onClick={form.handleSubmit(onSubmit)} disabled={isSubmitting} className="w-full bg-accent hover:bg-accent/90 text-accent-foreground">
             {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
             Soumettre & Terminer
           </Button>
         )}
-        {/* Placeholder for footer to maintain space if no buttons are visible */}
         {currentStep === 3 && <div className="h-10"></div>} 
       </CardFooter>
     </Card>

@@ -1,17 +1,19 @@
+
 import { Suspense } from 'react';
 import { SurveyForm } from '@/components/survey-form';
 import { SiteHeader } from '@/components/site-header';
-import Image from 'next/image';
+import { getAllPlayers, type Player } from '@/lib/players'; // Updated import
 
-export default function SurveyPage() {
+export default async function SurveyPage() {
+  const playersList: Player[] = await getAllPlayers(); // Fetch players
+
   return (
     <>
       <SiteHeader />
       <main className="flex-1 flex flex-col items-center justify-center p-4 md:p-8 relative">
-        {/* Removed Image component as global background is used */}
-        <div className="relative z-10 w-full max-w-2xl"> {/* Ensure content is above global overlay */}
-          <Suspense fallback={<div>Chargement du sondage...</div>}>
-            <SurveyForm />
+        <div className="relative z-10 w-full max-w-2xl">
+          <Suspense fallback={<div className="text-center text-lg text-primary-foreground p-8">Chargement du sondage...</div>}>
+            <SurveyForm players={playersList} /> {/* Pass players as prop */}
           </Suspense>
         </div>
       </main>

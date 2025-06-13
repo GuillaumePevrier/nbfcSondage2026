@@ -5,19 +5,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Progress } from "@/components/ui/progress";
 import { getPlayerResponses } from '@/actions/surveyActions';
-import { players as allPlayersList } from '@/lib/players';
+import { getAllPlayers } from '@/lib/players'; // Updated import
 import type { PlayerResponse } from '@/lib/players';
 import { SiteHeader } from '@/components/site-header';
 import { CheckCircle2, XCircle, Hourglass, MessageSquare, Users, ThumbsUp, ThumbsDown, Goal, PartyPopper, ShieldCheck } from 'lucide-react';
-import Image from 'next/image';
 
 export default async function ResultsPage() {
   const responses = await getPlayerResponses();
-  const responsesArray = Object.values(responses);
+  const allPlayersList = await getAllPlayers(); // Fetch players dynamically
+  const responsesArray = Object.values(responses).filter(r => r.surveyCompleted); // Only consider completed surveys for counts
 
   const totalPlayers = allPlayersList.length;
-  const positiveResponsesCount = responsesArray.filter(r => r.surveyCompleted && r.continues).length;
-  const negativeResponsesCount = responsesArray.filter(r => r.surveyCompleted && !r.continues).length;
+  const positiveResponsesCount = responsesArray.filter(r => r.continues).length;
+  const negativeResponsesCount = responsesArray.filter(r => !r.continues).length;
   const respondedCount = positiveResponsesCount + negativeResponsesCount;
   const pendingResponsesCount = totalPlayers - respondedCount;
 
@@ -33,7 +33,6 @@ export default async function ResultsPage() {
   } else if (positiveResponsesCount >= team1Target) {
     teamFormationMessage = "Super ! Une équipe au complet. Objectif 2ème équipe ! 💪";
   }
-
 
   const displayData = allPlayersList.map(player => {
     const response = responses[player.name];
@@ -55,10 +54,8 @@ export default async function ResultsPage() {
       <main className="flex-1 p-4 md:p-8">
         <section 
           className="relative w-full py-16 md:py-24 mb-8 rounded-lg shadow-lg"
-          // Removed backgroundImage style and data-ai-hint from here as global background is used
         >
-          {/* Removed overlay div as global overlay is used */}
-          <div className="container px-4 md:px-6 relative z-10 text-center"> {/* Ensure content is above global overlay */}
+          <div className="container px-4 md:px-6 relative z-10 text-center">
             <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl font-headline text-primary-foreground">
               Aperçu des Décisions de l'Équipe
             </h1>
@@ -148,8 +145,7 @@ export default async function ResultsPage() {
         </Card>
         
         <Card className="shadow-xl relative overflow-hidden">
-          {/* Removed local background image div as global background is used */}
-          <div className="relative z-10"> {/* Ensure content is above global overlay if any was local */}
+          <div className="relative z-10">
             <CardHeader>
               <CardTitle className="font-headline text-3xl">Réponses Détaillées</CardTitle>
               <CardDescription>

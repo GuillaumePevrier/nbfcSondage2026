@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -5,17 +6,16 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
-import { Home, ListChecks, BarChart3, Menu } from 'lucide-react';
+import { Home, ListChecks, BarChart3, Menu, UserPlus } from 'lucide-react';
+import { AddPlayerDialog } from './add-player-dialog'; // Import the dialog
 
 export function MobileNav() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>
-      {/* Sheet for mobile navigation, triggered from the header */}
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetTrigger asChild>
-          {/* This button is part of the SiteHeader and only visible on mobile */}
           <Button variant="ghost" size="icon" className="text-primary md:hidden" aria-label="Ouvrir le menu">
             <Menu className="h-6 w-6" />
           </Button>
@@ -25,10 +25,9 @@ export function MobileNav() {
             <div className="p-6 border-b">
               <Link href="/" className="flex items-center space-x-2" onClick={() => setIsOpen(false)}>
                 <Image src="/logo.png" alt="Logo NBFC Futsal Club" width={50} height={50} />
-                {/* Titre supprimé */}
               </Link>
             </div>
-            <nav className="flex-1 p-6 space-y-4">
+            <nav className="flex-1 p-6 space-y-1">
               <SheetClose asChild>
                 <Link href="/" className="flex items-center space-x-3 p-2 rounded-md hover:bg-muted">
                   <Home className="h-5 w-5 text-muted-foreground" />
@@ -46,6 +45,11 @@ export function MobileNav() {
                   <BarChart3 className="h-5 w-5 text-muted-foreground" />
                   <span className="text-base">Voir les Résultats</span>
                 </Link>
+              </SheetClose>
+              {/* We integrate AddPlayerDialog trigger here, ensuring SheetClose behavior is maintained */}
+              {/* The AddPlayerDialog itself will manage the dialog state, SheetClose will close the nav */}
+              <SheetClose asChild>
+                 <AddPlayerDialog isMobile={true} />
               </SheetClose>
             </nav>
             <div className="p-6 border-t mt-auto">

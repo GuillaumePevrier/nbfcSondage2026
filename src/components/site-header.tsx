@@ -1,7 +1,9 @@
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { MobileNav } from './mobile-nav'; // Import the mobile navigation
+import { AddPlayerDialog } from './add-player-dialog'; // Import the dialog
 
 export function SiteHeader() {
   return (
@@ -9,10 +11,8 @@ export function SiteHeader() {
       <div className="container flex h-16 max-w-screen-2xl items-center justify-between">
         <Link href="/" className="flex items-center space-x-2">
           <Image src="/logo.png" alt="Logo NBFC Futsal Club" width={60} height={60} className="rounded-sm ml-4" />
-          {/* Titre supprimé */}
         </Link>
         
-        {/* Desktop Navigation */}
         <nav className="hidden md:flex flex-1 items-center justify-end space-x-2">
           <Button variant="ghost" asChild>
             <Link href="/">Accueil</Link>
@@ -23,9 +23,9 @@ export function SiteHeader() {
           <Button variant="ghost" asChild>
             <Link href="/results">Résultats</Link>
           </Button>
+          <AddPlayerDialog /> 
         </nav>
 
-        {/* Mobile Navigation Trigger integrated into MobileNav component, shown only on md and smaller screens */}
         <div className="md:hidden">
           <MobileNav />
         </div>
