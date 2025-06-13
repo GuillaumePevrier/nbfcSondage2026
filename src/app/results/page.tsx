@@ -1,15 +1,39 @@
+
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Progress } from "@/components/ui/progress";
 import { getPlayerResponses } from '@/actions/surveyActions';
-import { players as allPlayersList, type PlayerResponse } from '@/lib/players';
+import { players as allPlayersList } from '@/lib/players';
+import type { PlayerResponse } from '@/lib/players';
 import { SiteHeader } from '@/components/site-header';
-import { CheckCircle2, XCircle, Hourglass, MessageSquare } from 'lucide-react';
+import { CheckCircle2, XCircle, Hourglass, MessageSquare, Users, ThumbsUp, ThumbsDown, Goal, PartyPopper, ShieldCheck, ShieldAlert } from 'lucide-react';
 import Image from 'next/image';
 
 export default async function ResultsPage() {
   const responses = await getPlayerResponses();
+  const responsesArray = Object.values(responses);
+
+  const totalPlayers = allPlayersList.length;
+  const positiveResponsesCount = responsesArray.filter(r => r.surveyCompleted && r.continues).length;
+  const negativeResponsesCount = responsesArray.filter(r => r.surveyCompleted && !r.continues).length;
+  const respondedCount = positiveResponsesCount + negativeResponsesCount;
+  const pendingResponsesCount = totalPlayers - respondedCount;
+
+  const team1Target = 10;
+  const team2Target = 20;
+
+  const progressTeam1 = Math.min((positiveResponsesCount / team1Target) * 100, 100);
+  const progressTeam2 = Math.min((positiveResponsesCount / team2Target) * 100, 100);
+
+  let teamFormationMessage = "En route pour la première équipe ! ⚽";
+  if (positiveResponsesCount >= team2Target) {
+    teamFormationMessage = "Objectif 2 équipes atteint ! Prêts à tout donner ! 🔥🔥";
+  } else if (positiveResponsesCount >= team1Target) {
+    teamFormationMessage = "Super ! Une équipe au complet. Objectif 2ème équipe ! 💪";
+  }
+
 
   const displayData = allPlayersList.map(player => {
     const response = responses[player.name];
@@ -32,7 +56,7 @@ export default async function ResultsPage() {
         <section 
           className="relative w-full py-16 md:py-24 bg-cover bg-center mb-8 rounded-lg shadow-lg"
           style={{ backgroundImage: "url('https://placehold.co/1200x400.png')" }}
-          data-ai-hint="futsal tactics board"
+          data-ai-hint="futsal stadium crowd"
         >
           <div className="absolute inset-0 bg-black/60 rounded-lg"></div>
           <div className="container px-4 md:px-6 relative z-10 text-center">
@@ -44,10 +68,89 @@ export default async function ResultsPage() {
             </p>
           </div>
         </section>
+
+        <section className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <Card className="shadow-lg hover:shadow-xl transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Joueurs</CardTitle>
+              <Users className="h-5 w-5 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold font-headline">{totalPlayers}</div>
+              <p className="text-xs text-muted-foreground">membres dans l'effectif</p>
+            </CardContent>
+          </Card>
+          <Card className="shadow-lg hover:shadow-xl transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Réponses "Oui"</CardTitle>
+              <ThumbsUp className="h-5 w-5 text-green-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold font-headline text-green-500">{positiveResponsesCount}</div>
+              <p className="text-xs text-muted-foreground">prêts à chausser les crampons</p>
+            </CardContent>
+          </Card>
+          <Card className="shadow-lg hover:shadow-xl transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Réponses "Non"</CardTitle>
+              <ThumbsDown className="h-5 w-5 text-red-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold font-headline text-red-500">{negativeResponsesCount}</div>
+              <p className="text-xs text-muted-foreground">feront une pause cette saison</p>
+            </CardContent>
+          </Card>
+          <Card className="shadow-lg hover:shadow-xl transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">En Attente</CardTitle>
+              <Hourglass className="h-5 w-5 text-yellow-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold font-headline text-yellow-500">{pendingResponsesCount}</div>
+              <p className="text-xs text-muted-foreground">réponses attendues</p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Card className="shadow-xl mb-8">
+          <CardHeader>
+            <div className="flex items-center space-x-3">
+              <Goal className="h-8 w-8 text-primary" />
+              <CardTitle className="font-headline text-3xl">Objectif Équipes !</CardTitle>
+            </div>
+            <CardDescription>{teamFormationMessage}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div>
+              <div className="mb-2 flex justify-between items-center">
+                <h3 className="text-lg font-medium flex items-center">
+                  <ShieldCheck className="h-5 w-5 mr-2 text-blue-500"/> Équipe 1 
+                  {positiveResponsesCount >= team1Target && <PartyPopper className="h-5 w-5 ml-2 text-yellow-400"/>}
+                </h3>
+                <span className="text-sm font-semibold text-muted-foreground">{positiveResponsesCount} / {team1Target} joueurs</span>
+              </div>
+              <Progress value={progressTeam1} className="h-3 [&>div]:bg-gradient-to-r [&>div]:from-blue-500 [&>div]:to-blue-400" />
+              {positiveResponsesCount < team1Target && <p className="text-xs text-muted-foreground mt-1">Encore {team1Target - positiveResponsesCount} joueur(s) pour former la première équipe.</p>}
+            </div>
+            {positiveResponsesCount >= team1Target && (
+              <div>
+                <div className="mb-2 flex justify-between items-center">
+                  <h3 className="text-lg font-medium flex items-center">
+                    <ShieldCheck className="h-5 w-5 mr-2 text-green-500"/>Équipe 2
+                    {positiveResponsesCount >= team2Target && <PartyPopper className="h-5 w-5 ml-2 text-yellow-400"/>}
+                  </h3>
+                  <span className="text-sm font-semibold text-muted-foreground">{positiveResponsesCount} / {team2Target} joueurs</span>
+                </div>
+                <Progress value={progressTeam2} className="h-3 [&>div]:bg-gradient-to-r [&>div]:from-green-500 [&>div]:to-green-400" />
+                {positiveResponsesCount < team2Target && <p className="text-xs text-muted-foreground mt-1">Encore {team2Target - positiveResponsesCount} joueur(s) pour la deuxième équipe.</p>}
+              </div>
+            )}
+          </CardContent>
+        </Card>
         
         <Card className="shadow-xl">
           <CardHeader>
-            <CardTitle className="font-headline text-3xl">Réponses au Sondage</CardTitle>
+            <CardTitle className="font-headline text-3xl">Réponses Détaillées</CardTitle>
             <CardDescription>
               Aperçu des décisions des joueurs et messages de motivation.
             </CardDescription>
