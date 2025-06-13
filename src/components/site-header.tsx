@@ -8,10 +8,8 @@ export function SiteHeader() {
     <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 max-w-screen-2xl items-center justify-between">
         <Link href="/" className="flex items-center space-x-2">
-          <Image src="/logo.png" alt="Logo NBFC Futsal Club" width={50} height={50} className="rounded-sm ml-4" />
-          <span className="font-bold font-headline sm:inline-block text-lg text-primary">
-            Sondage NBFC
-          </span>
+          <Image src="/logo.png" alt="Logo NBFC Futsal Club" width={60} height={60} className="rounded-sm ml-4" />
+          {/* Titre supprimé */}
         </Link>
         
         {/* Desktop Navigation */}

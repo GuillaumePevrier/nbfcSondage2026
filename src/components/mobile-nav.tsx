@@ -24,10 +24,8 @@ export function MobileNav() {
           <div className="flex flex-col h-full">
             <div className="p-6 border-b">
               <Link href="/" className="flex items-center space-x-2" onClick={() => setIsOpen(false)}>
-                <Image src="/logo.png" alt="Logo NBFC Futsal Club" width={40} height={40} />
-                <span className="font-bold font-headline text-lg text-primary">
-                  NBFC Futsal Club
-                </span>
+                <Image src="/logo.png" alt="Logo NBFC Futsal Club" width={50} height={50} />
+                {/* Titre supprimé */}
               </Link>
             </div>
             <nav className="flex-1 p-6 space-y-4">
