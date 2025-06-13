@@ -5,23 +5,19 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
-import { Dribbble, Home, ListChecks, BarChart3, Menu } from 'lucide-react'; // Dribbble as Futsal ball icon
+import { Home, ListChecks, BarChart3, Menu } from 'lucide-react';
 
 export function MobileNav() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>
-      {/* Floating Action Button */}
+      {/* Sheet for mobile navigation, triggered from the header */}
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetTrigger asChild>
-          <Button
-            variant="default"
-            size="icon"
-            className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-xl md:hidden bg-primary hover:bg-primary/90 text-primary-foreground z-50"
-            aria-label="Ouvrir le menu de navigation"
-          >
-            <Dribbble className="h-7 w-7" />
+          {/* This button is part of the SiteHeader and only visible on mobile */}
+          <Button variant="ghost" size="icon" className="text-primary md:hidden" aria-label="Ouvrir le menu">
+            <Menu className="h-6 w-6" />
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="w-[270px] p-0 bg-card text-card-foreground md:hidden">
@@ -62,18 +58,6 @@ export function MobileNav() {
           </div>
         </SheetContent>
       </Sheet>
-
-      {/* Fallback for desktop if needed, or just for triggering from header */}
-       <div className="md:hidden">
-        <Sheet open={isOpen} onOpenChange={setIsOpen}>
-          <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="text-primary" aria-label="Ouvrir le menu">
-              <Menu className="h-6 w-6" />
-            </Button>
-          </SheetTrigger>
-          {/* SheetContent is the same as above, defined once is enough if state is managed globally or passed down */}
-        </Sheet>
-      </div>
     </>
   );
 }

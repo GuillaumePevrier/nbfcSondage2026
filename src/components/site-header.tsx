@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { MobileNav } from './mobile-nav'; // Import the new mobile navigation
+import { MobileNav } from './mobile-nav'; // Import the mobile navigation
 
 export function SiteHeader() {
   return (
@@ -27,7 +27,7 @@ export function SiteHeader() {
           </Button>
         </nav>
 
-        {/* Mobile Navigation Trigger - Button integrated into MobileNav component */}
+        {/* Mobile Navigation Trigger integrated into MobileNav component, shown only on md and smaller screens */}
         <div className="md:hidden">
           <MobileNav />
         </div>
