@@ -1,32 +1,119 @@
 
 {
-  "Cedric Lebas": { "playerName": "Cedric Lebas", "surveyCompleted": false },
-  "Erwan Anfray": { "playerName": "Erwan Anfray", "surveyCompleted": false },
-  "Ewen Bersot": { "playerName": "Ewen Bersot", "surveyCompleted": false },
-  "François Beaudouin": { "playerName": "François Beaudouin", "surveyCompleted": false },
-  "Guillaume Pévrier": { "playerName": "Guillaume Pévrier", "surveyCompleted": false },
-  "Jean Romu": { "playerName": "Jean Romu", "surveyCompleted": false },
-  "Laurent Collet": { "playerName": "Laurent Collet", "surveyCompleted": false },
-  "Max Fremont": { "playerName": "Max Fremont", "surveyCompleted": false },
-  "Nicolas Ge": { "playerName": "Nicolas Ge", "surveyCompleted": false },
-  "Rom Savatte": { "playerName": "Rom Savatte", "surveyCompleted": false },
-  "Vincent Poilvet": { "playerName": "Vincent Poilvet", "surveyCompleted": false },
-  "Drd Julien": { "playerName": "Drd Julien", "surveyCompleted": false },
-  "Germain Mqn": { "playerName": "Germain Mqn", "surveyCompleted": false },
-  "Jérémy Aubert": { "playerName": "Jérémy Aubert", "surveyCompleted": false },
-  "Nicolas Beillard": { "playerName": "Nicolas Beillard", "surveyCompleted": false },
-  "Dimitri Hudin": { "playerName": "Dimitri Hudin", "surveyCompleted": false },
-  "Yann Uvy": { "playerName": "Yann Uvy", "surveyCompleted": false },
-  "Yoann Poulain": { "playerName": "Yoann Poulain", "surveyCompleted": false },
-  "Léo Briantais": { "playerName": "Léo Briantais", "surveyCompleted": false },
-  "Thibault Smolevsky": { "playerName": "Thibault Smolevsky", "surveyCompleted": false },
-  "Kévin MH": { "playerName": "Kévin MH", "surveyCompleted": false },
-  "Alexander Alessandro": { "playerName": "Alexander Alessandro", "surveyCompleted": false },
-  "Nico Lamacq": { "playerName": "Nico Lamacq", "surveyCompleted": false },
-  "Jaddour Omar": { "playerName": "Jaddour Omar", "surveyCompleted": false },
-  "Nicolas Gousset": { "playerName": "Nicolas Gousset", "surveyCompleted": false },
-  "Martin Lbn": { "playerName": "Martin Lbn", "surveyCompleted": false },
-  "Vincent Bourdoiseau": { "playerName": "Vincent Bourdoiseau", "surveyCompleted": false },
-  "Alecs Gen": { "playerName": "Alecs Gen", "surveyCompleted": false },
-  "Amine Rhidane": { "playerName": "Amine Rhidane", "surveyCompleted": false }
+  "Cedric Lebas": {
+    "playerName": "Cedric Lebas",
+    "surveyCompleted": false
+  },
+  "Erwan Anfray": {
+    "playerName": "Erwan Anfray",
+    "surveyCompleted": false
+  },
+  "Ewen Bersot": {
+    "playerName": "Ewen Bersot",
+    "surveyCompleted": false
+  },
+  "François Beaudouin": {
+    "playerName": "François Beaudouin",
+    "surveyCompleted": false
+  },
+  "Guillaume Pévrier": {
+    "playerName": "Guillaume Pévrier",
+    "surveyCompleted": false
+  },
+  "Jean Romu": {
+    "playerName": "Jean Romu",
+    "surveyCompleted": false
+  },
+  "Laurent Collet": {
+    "playerName": "Laurent Collet",
+    "surveyCompleted": false
+  },
+  "Max Fremont": {
+    "playerName": "Max Fremont",
+    "surveyCompleted": false
+  },
+  "Nicolas Ge": {
+    "playerName": "Nicolas Ge",
+    "surveyCompleted": false
+  },
+  "Rom Savatte": {
+    "playerName": "Rom Savatte",
+    "surveyCompleted": false
+  },
+  "Vincent Poilvet": {
+    "playerName": "Vincent Poilvet",
+    "surveyCompleted": false
+  },
+  "Drd Julien": {
+    "playerName": "Drd Julien",
+    "surveyCompleted": false
+  },
+  "Germain Mqn": {
+    "playerName": "Germain Mqn",
+    "surveyCompleted": false
+  },
+  "Jérémy Aubert": {
+    "playerName": "Jérémy Aubert",
+    "surveyCompleted": false
+  },
+  "Nicolas Beillard": {
+    "playerName": "Nicolas Beillard",
+    "surveyCompleted": false
+  },
+  "Dimitri Hudin": {
+    "playerName": "Dimitri Hudin",
+    "surveyCompleted": false
+  },
+  "Yann Uvy": {
+    "playerName": "Yann Uvy",
+    "surveyCompleted": false
+  },
+  "Yoann Poulain": {
+    "playerName": "Yoann Poulain",
+    "surveyCompleted": false
+  },
+  "Léo Briantais": {
+    "playerName": "Léo Briantais",
+    "surveyCompleted": false
+  },
+  "Thibault Smolevsky": {
+    "playerName": "Thibault Smolevsky",
+    "surveyCompleted": false
+  },
+  "Kévin MH": {
+    "playerName": "Kévin MH",
+    "surveyCompleted": false
+  },
+  "Alexander Alessandro": {
+    "playerName": "Alexander Alessandro",
+    "surveyCompleted": false
+  },
+  "Nico Lamacq": {
+    "playerName": "Nico Lamacq",
+    "surveyCompleted": false
+  },
+  "Jaddour Omar": {
+    "playerName": "Jaddour Omar",
+    "surveyCompleted": false
+  },
+  "Nicolas Gousset": {
+    "playerName": "Nicolas Gousset",
+    "surveyCompleted": false
+  },
+  "Martin Lbn": {
+    "playerName": "Martin Lbn",
+    "surveyCompleted": false
+  },
+  "Vincent Bourdoiseau": {
+    "playerName": "Vincent Bourdoiseau",
+    "surveyCompleted": false
+  },
+  "Alecs Gen": {
+    "playerName": "Alecs Gen",
+    "surveyCompleted": false
+  },
+  "Amine Rhidane": {
+    "playerName": "Amine Rhidane",
+    "surveyCompleted": false
+  }
 }
