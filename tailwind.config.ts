@@ -11,7 +11,7 @@ export default {
     extend: {
       fontFamily: {
         body: ['Oswald', 'sans-serif'],
-        headline: ['Graduate', 'serif'], // Changed from Belleza to Graduate
+        headline: ['Graduate', 'serif'], 
         code: ['monospace'],
       },
       colors: {
@@ -46,7 +46,7 @@ export default {
           foreground: 'hsl(var(--destructive-foreground))',
         },
         border: 'hsl(var(--border))',
-        input: 'hsl(var(--input))',
+        input: 'hsl(var(--input))', // La variable --input est toujours là, mais Input.tsx utilise maintenant border-border.
         ring: 'hsl(var(--ring))',
         chart: {
           '1': 'hsl(var(--chart-1))',
@@ -88,7 +88,7 @@ export default {
             height: '0',
           },
         },
-        'border-color-cycle': { /* Renamed for clarity */
+        'border-color-cycle-animation': { /* Nom du keyframe aligné avec globals.css */
           '0%, 100%': { '--border-cycle-hue': '0' }, /* Red */
           '33%': { '--border-cycle-hue': '185' },  /* Teal */
           '66%': { '--border-cycle-hue': '225' },  /* Blue */
@@ -97,7 +97,7 @@ export default {
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
-        'border-cycle': 'border-color-cycle 10s linear infinite', /* Renamed for clarity */
+        'border-cycle': 'border-color-cycle-animation 10s linear infinite', /* Utilise le keyframe harmonisé */
       },
     },
   },
