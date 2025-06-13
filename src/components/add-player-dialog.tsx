@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation'; // Pour rafraîchir
+import { useRouter } from 'next/navigation'; 
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -30,13 +30,18 @@ const addPlayerSchema = z.object({
 type AddPlayerFormValues = z.infer<typeof addPlayerSchema>;
 
 interface AddPlayerDialogProps {
-  onPlayerAdded?: () => void; // Callback pour rafraîchir la liste si nécessaire
+  onPlayerAdded?: () => void; 
   triggerButtonVariant?: "ghost" | "outline" | "default" | "secondary" | "link" | "destructive";
   triggerButtonClassName?: string;
   isMobile?: boolean;
 }
 
-export function AddPlayerDialog({ onPlayerAdded, triggerButtonVariant = "ghost", triggerButtonClassName, isMobile = false }: AddPlayerDialogProps) {
+export function AddPlayerDialog({ 
+  onPlayerAdded, 
+  triggerButtonVariant = "ghost", 
+  triggerButtonClassName, 
+  isMobile = false 
+}: AddPlayerDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
@@ -63,7 +68,7 @@ export function AddPlayerDialog({ onPlayerAdded, triggerButtonVariant = "ghost",
         if (onPlayerAdded) {
           onPlayerAdded();
         }
-        router.refresh(); // Rafraîchit les données du serveur et re-rend les composants serveur
+        router.refresh(); 
       } else {
         toast({
           title: 'Erreur',
@@ -85,7 +90,7 @@ export function AddPlayerDialog({ onPlayerAdded, triggerButtonVariant = "ghost",
   const triggerContent = isMobile ? (
     <>
       <UserPlus className="h-5 w-5 text-muted-foreground" />
-      <span className="text-base">Ajouter Joueur</span>
+      <span>Ajouter Joueur</span>
     </>
   ) : (
     <>
@@ -93,10 +98,12 @@ export function AddPlayerDialog({ onPlayerAdded, triggerButtonVariant = "ghost",
       Ajouter un Joueur
     </>
   );
+  
+  const commonButtonClasses = "flex items-center rounded-md hover:bg-muted w-full text-left";
 
   const triggerElement = isMobile ? (
      <DialogTrigger asChild>
-        <button className="flex items-center space-x-3 p-2 rounded-md hover:bg-muted w-full text-left">
+        <button className={`${commonButtonClasses} ${triggerButtonClassName || 'space-x-3 p-2'}`}>
          {triggerContent}
         </button>
     </DialogTrigger>
@@ -126,7 +133,7 @@ export function AddPlayerDialog({ onPlayerAdded, triggerButtonVariant = "ghost",
               id="playerName"
               {...form.register('playerName')}
               placeholder="Ex: Kylian Mbappé"
-              className={form.formState.errors.playerName ? 'border-destructive focus-visible:ring-destructive' : ''}
+              className={`text-base ${form.formState.errors.playerName ? 'border-destructive focus-visible:ring-destructive' : ''}`}
             />
             {form.formState.errors.playerName && (
               <p className="text-sm text-destructive pt-1">
@@ -134,13 +141,13 @@ export function AddPlayerDialog({ onPlayerAdded, triggerButtonVariant = "ghost",
               </p>
             )}
           </div>
-          <DialogFooter className="sm:justify-between gap-2">
+          <DialogFooter className="sm:justify-between gap-2 pt-2">
              <DialogClose asChild>
-                <Button type="button" variant="outline" disabled={isSubmitting}>
+                <Button type="button" variant="outline" disabled={isSubmitting} size="lg">
                 Annuler
                 </Button>
             </DialogClose>
-            <Button type="submit" disabled={isSubmitting} className="bg-primary hover:bg-primary/90">
+            <Button type="submit" disabled={isSubmitting} className="bg-primary hover:bg-primary/90" size="lg">
               {isSubmitting ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (

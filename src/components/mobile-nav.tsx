@@ -6,8 +6,11 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
-import { Home, ListChecks, BarChart3, Menu, UserPlus } from 'lucide-react';
-import { AddPlayerDialog } from './add-player-dialog'; // Import the dialog
+import { Home, ListChecks, BarChart3, Menu } from 'lucide-react';
+import { AddPlayerDialog } from './add-player-dialog'; 
+import CountdownTimer from './countdown-timer';
+
+const TARGET_DATE_STRING = "2025-06-27T23:59:59";
 
 export function MobileNav() {
   const [isOpen, setIsOpen] = useState(false);
@@ -20,39 +23,50 @@ export function MobileNav() {
             <Menu className="h-6 w-6" />
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="w-[270px] p-0 bg-card text-card-foreground md:hidden">
+        <SheetContent side="left" className="w-[280px] p-0 bg-card text-card-foreground md:hidden">
           <div className="flex flex-col h-full">
-            <div className="p-6 border-b">
-              <Link href="/" className="flex items-center space-x-2" onClick={() => setIsOpen(false)}>
+            <div className="p-4 border-b">
+              <Link href="/" className="flex items-center space-x-3 mb-2" onClick={() => setIsOpen(false)}>
                 <Image src="/logo.png" alt="Logo NBFC Futsal Club" width={50} height={50} />
+                 <span className="font-bold text-lg font-headline">NBFC Futsal</span>
               </Link>
+              <div className="mt-2 text-center">
+                 <span className="text-xs text-muted-foreground font-medium">Fin du sondage :</span>
+                <CountdownTimer 
+                  targetDate={TARGET_DATE_STRING} 
+                  className="text-card-foreground justify-center" 
+                  textClassName="text-sm tracking-normal"
+                  iconClassName="h-4 w-4"
+                />
+              </div>
             </div>
-            <nav className="flex-1 p-6 space-y-1">
+            <nav className="flex-1 p-4 space-y-1.5">
               <SheetClose asChild>
-                <Link href="/" className="flex items-center space-x-3 p-2 rounded-md hover:bg-muted">
+                <Link href="/" className="flex items-center space-x-3 p-2.5 rounded-md hover:bg-muted text-base">
                   <Home className="h-5 w-5 text-muted-foreground" />
-                  <span className="text-base">Accueil</span>
+                  <span>Accueil</span>
                 </Link>
               </SheetClose>
               <SheetClose asChild>
-                <Link href="/survey" className="flex items-center space-x-3 p-2 rounded-md hover:bg-muted">
+                <Link href="/survey" className="flex items-center space-x-3 p-2.5 rounded-md hover:bg-muted text-base">
                   <ListChecks className="h-5 w-5 text-muted-foreground" />
-                  <span className="text-base">Participer au Sondage</span>
+                  <span>Participer au Sondage</span>
                 </Link>
               </SheetClose>
               <SheetClose asChild>
-                <Link href="/results" className="flex items-center space-x-3 p-2 rounded-md hover:bg-muted">
+                <Link href="/results" className="flex items-center space-x-3 p-2.5 rounded-md hover:bg-muted text-base">
                   <BarChart3 className="h-5 w-5 text-muted-foreground" />
-                  <span className="text-base">Voir les Résultats</span>
+                  <span>Voir les Résultats</span>
                 </Link>
               </SheetClose>
-              {/* We integrate AddPlayerDialog trigger here, ensuring SheetClose behavior is maintained */}
-              {/* The AddPlayerDialog itself will manage the dialog state, SheetClose will close the nav */}
               <SheetClose asChild>
-                 <AddPlayerDialog isMobile={true} />
+                 <AddPlayerDialog 
+                    isMobile={true} 
+                    triggerButtonClassName="w-full text-base !justify-start space-x-3 p-2.5"
+                 />
               </SheetClose>
             </nav>
-            <div className="p-6 border-t mt-auto">
+            <div className="p-4 border-t mt-auto">
               <p className="text-xs text-muted-foreground text-center">
                 © {new Date().getFullYear()} NBFC Futsal Club
               </p>
