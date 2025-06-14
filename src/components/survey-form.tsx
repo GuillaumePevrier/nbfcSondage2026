@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import type { Player, SurveyFormData } from '@/lib/players'; // Updated import, Player is now an interface
+import type { Player, SurveyFormData as ActionSurveyFormData } from '@/lib/players';
 import { getAIMotivationalMessageAction, finalizeSurveyAction } from '@/actions/surveyActions';
 import { PlayCircle, ChevronLeft, ChevronRight, Send, Loader2, Smile, Frown } from 'lucide-react';
 import Image from 'next/image';
@@ -52,7 +52,7 @@ const slideVariants = {
 };
 
 interface SurveyFormProps {
-  players: Player[]; // Receive players as a prop
+  players: Player[]; // Player list from Firestore
 }
 
 export function SurveyForm({ players }: SurveyFormProps) {
@@ -89,9 +89,9 @@ export function SurveyForm({ players }: SurveyFormProps) {
 
       setIsLoading(true);
       try {
-        const playerName = form.getValues('playerName');
-        const willContinue = form.getValues('willContinue') === 'yes';
-        const message = await getAIMotivationalMessageAction(playerName, willContinue);
+        const playerNameValue = form.getValues('playerName');
+        const willContinueValue = form.getValues('willContinue') === 'yes';
+        const message = await getAIMotivationalMessageAction(playerNameValue, willContinueValue);
         setMotivationalMessage(message);
         setCurrentStep((prev) => prev + 1);
       } catch (error) {
@@ -110,37 +110,36 @@ export function SurveyForm({ players }: SurveyFormProps) {
   };
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    if (!motivationalMessage && data.willContinue) { // Motivational message is generated only if a decision is made
-       // Try to generate message now if it was skipped (e.g. if user directly submitted after filling form without AI step)
-       // This case might not happen with current step logic but as a safeguard
-      setIsLoading(true);
-      try {
-        const message = await getAIMotivationalMessageAction(data.playerName, data.willContinue === 'yes');
-        setMotivationalMessage(message);
-         // Proceed with submission logic with the newly fetched message in the finally block or a chained promise
-      } catch (error) {
-        toast({ title: 'Erreur', description: 'Impossible de récupérer le message de motivation avant soumission.', variant: 'destructive' });
-        setIsLoading(false);
-        setIsSubmitting(false); // Ensure this is reset
-        return;
-      } finally {
-        // This needs to be refactored to submit AFTER message is set
-      }
-    }
-    
-    // Ensure motivationalMessage is available before proceeding
-    // This re-check is because the above block is async
-    const finalMotivationalMessage = motivationalMessage || (data.willContinue ? "Message de motivation par défaut si la génération a échoué." : "Merci pour votre participation.");
-
+    let finalMotivationalMessage = motivationalMessage;
 
     setIsSubmitting(true);
+    // Ensure motivational message is generated if not already
+    if (!finalMotivationalMessage && data.willContinue) {
+        setIsLoading(true); // Show loading for AI message generation
+        try {
+            finalMotivationalMessage = await getAIMotivationalMessageAction(data.playerName, data.willContinue === 'yes');
+            setMotivationalMessage(finalMotivationalMessage); // Store it
+        } catch (error) {
+            toast({ title: 'Erreur de Motivation', description: 'Impossible de générer le message IA. Utilisation d\'un message par défaut.', variant: 'default' });
+            finalMotivationalMessage = data.willContinue === 'yes' ? "Super nouvelle ! Préparez-vous pour une saison incroyable." : "Merci pour votre participation ! Nous vous souhaitons le meilleur.";
+        } finally {
+            setIsLoading(false);
+        }
+    }
+    
+    // Fallback if message is still null (should not happen if logic above is correct)
+    if (!finalMotivationalMessage) {
+        finalMotivationalMessage = data.willContinue === 'yes' ? "Message positif par défaut." : "Message de remerciement par défaut.";
+    }
+
     try {
-      const surveyData: SurveyFormData = {
+      // The server action `finalizeSurveyAction` now expects `playerName` and `willContinue`
+      const surveyPayload: ActionSurveyFormData = {
         playerName: data.playerName,
         willContinue: data.willContinue === 'yes',
       };
-      // Pass the potentially newly generated or existing motivational message
-      const result = await finalizeSurveyAction(surveyData, finalMotivationalMessage);
+      
+      const result = await finalizeSurveyAction(surveyPayload, finalMotivationalMessage);
 
       if (result.success && result.data) {
         const emailParams = {
@@ -163,8 +162,8 @@ export function SurveyForm({ players }: SurveyFormProps) {
             await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, emailParams, EMAILJS_PUBLIC_KEY);
             toast({ title: 'Sondage Soumis !', description: 'Votre réponse a été enregistrée et un email envoyé.' });
         }
-        
-        setCurrentStep((prev) => prev + 1);
+        router.refresh(); // Refresh data on other pages
+        setCurrentStep((prev) => prev + 1); // Move to complete step
       } else {
         toast({ title: 'Échec de la Soumission', description: result.error || 'Impossible d\'enregistrer votre réponse.', variant: 'destructive' });
       }
@@ -172,7 +171,7 @@ export function SurveyForm({ players }: SurveyFormProps) {
       console.error('Erreur de soumission:', error);
       toast({ title: 'Erreur de Soumission', description: 'Une erreur inattendue est survenue.', variant: 'destructive' });
     } finally {
-      setIsLoading(false); // Ensure loading is also false
+      setIsLoading(false); 
       setIsSubmitting(false);
     }
   };
@@ -268,9 +267,9 @@ export function SurveyForm({ players }: SurveyFormProps) {
                 </div>  
                 )}
 
-                {currentStep === 2 && motivationalMessage && ( 
+                {currentStep === 2 && ( 
                   <div className="text-center space-y-6 p-4 border border-primary/50 rounded-lg bg-primary/10">
-                     <p className="text-xl font-semibold text-primary-foreground bg-primary p-3 rounded-md shadow-md">{motivationalMessage}</p>
+                     <p className="text-xl font-semibold text-primary-foreground bg-primary p-3 rounded-md shadow-md">{isLoading ? "Génération du message..." : motivationalMessage}</p>
                     <p className="text-muted-foreground">Prêt à officialiser ?</p>
                   </div>
                 )}
@@ -301,20 +300,18 @@ export function SurveyForm({ players }: SurveyFormProps) {
           </Button>
         )}
         {currentStep === 1 && (
-          <Button onClick={handleNext} disabled={isLoading} className="ml-auto bg-primary hover:bg-primary/90 text-primary-foreground">
+          <Button onClick={handleNext} disabled={isLoading || isSubmitting} className="ml-auto bg-primary hover:bg-primary/90 text-primary-foreground">
             {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ChevronRight className="mr-2 h-4 w-4" />}
             Suivant
           </Button>
         )}
         {currentStep === 2 && (
-          // Changed type to button to prevent form submission if user clicks this before the form.handleSubmit wrapper kicks in
-          // The actual submission is handled by form.handleSubmit(onSubmit) on the form element
-          <Button onClick={form.handleSubmit(onSubmit)} disabled={isSubmitting} className="w-full bg-accent hover:bg-accent/90 text-accent-foreground">
-            {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
+          <Button onClick={form.handleSubmit(onSubmit)} disabled={isSubmitting || isLoading} className="w-full bg-accent hover:bg-accent/90 text-accent-foreground">
+            {isSubmitting || isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
             Soumettre & Terminer
           </Button>
         )}
-        {currentStep === 3 && <div className="h-10"></div>} 
+        {currentStep === 3 && <div className="h-10"></div> /* Placeholder for consistent footer height */} 
       </CardFooter>
     </Card>
   );

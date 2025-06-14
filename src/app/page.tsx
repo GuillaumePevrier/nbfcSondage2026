@@ -3,8 +3,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { getPlayerResponses } from '@/actions/surveyActions';
-import { getAllPlayers, type Player } from '@/lib/players'; // Updated import
+import { getPlayersAndSurveyData, type PlayerSurveyDisplayData } from '@/actions/surveyActions';
 import { SiteHeader } from '@/components/site-header';
 import { CheckCircle2, XCircle, Hourglass, Edit3 } from 'lucide-react';
 import CountdownTimer from '@/components/countdown-timer';
@@ -12,8 +11,7 @@ import CountdownTimer from '@/components/countdown-timer';
 const TARGET_DATE_STRING = "2025-06-27T23:59:59";
 
 export default async function HomePage() {
-  const responses = await getPlayerResponses();
-  const allPlayers = await getAllPlayers(); // Fetch players dynamically
+  const playersWithSurveyData: PlayerSurveyDisplayData[] = await getPlayersAndSurveyData();
 
   return (
     <>
@@ -62,13 +60,12 @@ export default async function HomePage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {allPlayers.map((player: Player) => {
-                        const response = responses[player.name];
-                        const hasResponded = response?.surveyCompleted;
-                        const continues = response?.continues;
+                      {playersWithSurveyData.map((playerData) => {
+                        const hasResponded = playerData.surveyCompleted;
+                        const continues = playerData.continues;
                         return (
-                          <TableRow key={player.id}>
-                            <TableCell className="font-medium">{player.name}</TableCell>
+                          <TableRow key={playerData.id}>
+                            <TableCell className="font-medium">{playerData.name}</TableCell>
                             <TableCell>
                               {hasResponded ? (
                                 continues ? (
@@ -88,7 +85,7 @@ export default async function HomePage() {
                             </TableCell>
                             <TableCell className="text-right">
                               <Button variant="outline" size="sm" asChild>
-                                <Link href={`/survey?playerName=${encodeURIComponent(player.name)}`}>
+                                <Link href={`/survey?playerName=${encodeURIComponent(playerData.name)}`}>
                                   <Edit3 className="w-4 h-4 mr-1.5" />
                                   {hasResponded ? 'Voir/Modifier' : 'Commencer'}
                                 </Link>

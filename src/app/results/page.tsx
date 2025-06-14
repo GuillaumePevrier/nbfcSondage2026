@@ -4,9 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Progress } from "@/components/ui/progress";
-import { getPlayerResponses } from '@/actions/surveyActions';
-import { getAllPlayers } from '@/lib/players'; // Updated import
-import type { PlayerResponse } from '@/lib/players';
+import { getPlayersAndSurveyData, type PlayerSurveyDisplayData } from '@/actions/surveyActions';
 import { SiteHeader } from '@/components/site-header';
 import { CheckCircle2, XCircle, Hourglass, MessageSquare, Users, ThumbsUp, ThumbsDown, Goal, PartyPopper, ShieldCheck } from 'lucide-react';
 import CountdownTimer from '@/components/countdown-timer';
@@ -14,14 +12,14 @@ import CountdownTimer from '@/components/countdown-timer';
 const TARGET_DATE_STRING = "2025-06-27T23:59:59";
 
 export default async function ResultsPage() {
-  const responses = await getPlayerResponses();
-  const allPlayersList = await getAllPlayers(); // Fetch players dynamically
-  const responsesArray = Object.values(responses).filter(r => r.surveyCompleted); // Only consider completed surveys for counts
+  const playersWithSurveyData: PlayerSurveyDisplayData[] = await getPlayersAndSurveyData();
+  
+  const completedSurveys = playersWithSurveyData.filter(r => r.surveyCompleted);
 
-  const totalPlayers = allPlayersList.length;
-  const positiveResponsesCount = responsesArray.filter(r => r.continues).length;
-  const negativeResponsesCount = responsesArray.filter(r => !r.continues).length;
-  const respondedCount = positiveResponsesCount + negativeResponsesCount;
+  const totalPlayers = playersWithSurveyData.length;
+  const positiveResponsesCount = completedSurveys.filter(r => r.continues).length;
+  const negativeResponsesCount = completedSurveys.filter(r => !r.continues).length; // Only count if surveyCompleted is true
+  const respondedCount = completedSurveys.length;
   const pendingResponsesCount = totalPlayers - respondedCount;
 
   const team1Target = 10;
@@ -36,20 +34,6 @@ export default async function ResultsPage() {
   } else if (positiveResponsesCount >= team1Target) {
     teamFormationMessage = "Super ! Une équipe au complet. Objectif 2ème équipe ! 💪";
   }
-
-  const displayData = allPlayersList.map(player => {
-    const response = responses[player.name];
-    return {
-      name: player.name,
-      status: response?.surveyCompleted 
-        ? (response.continues ? 'Continue' : 'Ne continue pas') 
-        : 'En attente',
-      continues: response?.continues,
-      surveyCompleted: response?.surveyCompleted || false,
-      motivationalMessage: response?.motivationalMessage,
-      timestamp: response?.timestamp ? new Date(response.timestamp).toLocaleDateString('fr-FR') : '-',
-    };
-  });
 
   return (
     <>
@@ -167,8 +151,8 @@ export default async function ResultsPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {displayData.map((playerData) => (
-                      <TableRow key={playerData.name}>
+                    {playersWithSurveyData.map((playerData) => (
+                      <TableRow key={playerData.id}>
                         <TableCell className="font-medium">{playerData.name}</TableCell>
                         <TableCell>
                           {!playerData.surveyCompleted ? (
@@ -185,7 +169,7 @@ export default async function ResultsPage() {
                             </span>
                           )}
                         </TableCell>
-                        <TableCell>{playerData.timestamp}</TableCell>
+                        <TableCell>{playerData.timestamp ? new Date(playerData.timestamp).toLocaleDateString('fr-FR') : '-'}</TableCell>
                         <TableCell className="max-w-xs">
                           {playerData.motivationalMessage ? (
                             <div className="flex items-start space-x-2" title={playerData.motivationalMessage}>

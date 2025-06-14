@@ -2,13 +2,14 @@
 import { Suspense } from 'react';
 import { SurveyForm } from '@/components/survey-form';
 import { SiteHeader } from '@/components/site-header';
-import { getAllPlayers, type Player } from '@/lib/players'; // Updated import
+import { getAllPlayers, type Player } from '@/lib/players';
 import CountdownTimer from '@/components/countdown-timer';
 
 const TARGET_DATE_STRING = "2025-06-27T23:59:59";
 
 export default async function SurveyPage() {
-  const playersList: Player[] = await getAllPlayers(); // Fetch players
+  // Fetch players directly from Firestore for the dropdown
+  const playersList: Player[] = await getAllPlayers();
 
   return (
     <>
@@ -16,7 +17,7 @@ export default async function SurveyPage() {
       <main className="flex-1 flex flex-col items-center justify-center p-4 md:p-8 relative">
         <div className="relative z-10 w-full max-w-2xl">
           <Suspense fallback={<div className="text-center text-lg text-primary-foreground p-8">Chargement du sondage...</div>}>
-            <SurveyForm players={playersList} /> {/* Pass players as prop */}
+            <SurveyForm players={playersList} /> {/* Pass players from Firestore as prop */}
           </Suspense>
         </div>
       </main>
