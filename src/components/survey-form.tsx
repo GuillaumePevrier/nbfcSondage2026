@@ -93,32 +93,31 @@ export function SurveyForm({ players }: SurveyFormProps) {
         const willContinueValue = form.getValues('willContinue') === 'yes';
         const message = await getAIMotivationalMessageAction(playerNameValue, willContinueValue);
         setMotivationalMessage(message);
-        setCurrentStep((prev) => prev + 1);
+        setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
       } catch (error) {
         toast({ title: 'Erreur', description: 'Impossible de récupérer le message de motivation.', variant: 'destructive' });
       } finally {
         setIsLoading(false);
       }
     } else {
-      setCurrentStep((prev) => prev + 1);
+      setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
     }
   };
 
   const handleBack = () => {
     setDirection(-1);
-    setCurrentStep((prev) => prev - 1);
+    setCurrentStep((prev) => Math.max(prev - 1, 0));
   };
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     let finalMotivationalMessage = motivationalMessage;
 
     setIsSubmitting(true);
-    // Ensure motivational message is generated if not already
     if (!finalMotivationalMessage && data.willContinue) {
-        setIsLoading(true); // Show loading for AI message generation
+        setIsLoading(true); 
         try {
             finalMotivationalMessage = await getAIMotivationalMessageAction(data.playerName, data.willContinue === 'yes');
-            setMotivationalMessage(finalMotivationalMessage); // Store it
+            setMotivationalMessage(finalMotivationalMessage); 
         } catch (error) {
             toast({ title: 'Erreur de Motivation', description: 'Impossible de générer le message IA. Utilisation d\'un message par défaut.', variant: 'default' });
             finalMotivationalMessage = data.willContinue === 'yes' ? "Super nouvelle ! Préparez-vous pour une saison incroyable." : "Merci pour votre participation ! Nous vous souhaitons le meilleur.";
@@ -127,13 +126,11 @@ export function SurveyForm({ players }: SurveyFormProps) {
         }
     }
     
-    // Fallback if message is still null (should not happen if logic above is correct)
     if (!finalMotivationalMessage) {
         finalMotivationalMessage = data.willContinue === 'yes' ? "Message positif par défaut." : "Message de remerciement par défaut.";
     }
 
     try {
-      // The server action `finalizeSurveyAction` now expects `playerName` and `willContinue`
       const surveyPayload: ActionSurveyFormData = {
         playerName: data.playerName,
         willContinue: data.willContinue === 'yes',
@@ -162,8 +159,8 @@ export function SurveyForm({ players }: SurveyFormProps) {
             await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, emailParams, EMAILJS_PUBLIC_KEY);
             toast({ title: 'Sondage Soumis !', description: 'Votre réponse a été enregistrée et un email envoyé.' });
         }
-        router.refresh(); // Refresh data on other pages
-        setCurrentStep((prev) => prev + 1); // Move to complete step
+        router.refresh(); 
+        setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1)); 
       } else {
         toast({ title: 'Échec de la Soumission', description: result.error || 'Impossible d\'enregistrer votre réponse.', variant: 'destructive' });
       }
@@ -176,7 +173,15 @@ export function SurveyForm({ players }: SurveyFormProps) {
     }
   };
   
-  const currentStepDetails = useMemo(() => steps[currentStep], [currentStep]);
+  const currentStepDetails = useMemo(() => {
+    // Defensive check to ensure currentStep is within bounds
+    const safeStep = Math.max(0, Math.min(currentStep, steps.length - 1));
+    if (currentStep !== safeStep) {
+      // This condition indicates that currentStep was out of bounds before clamping.
+      // console.warn(`SurveyForm: currentStep ${currentStep} was out of bounds. Clamped to ${safeStep}.`);
+    }
+    return steps[safeStep];
+  }, [currentStep]);
 
   return (
     <Card className="w-full shadow-2xl bg-card/95 backdrop-blur-sm">
@@ -316,3 +321,4 @@ export function SurveyForm({ players }: SurveyFormProps) {
     </Card>
   );
 }
+
