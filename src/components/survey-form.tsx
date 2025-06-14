@@ -16,7 +16,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import type { Player, SurveyFormData as ActionSurveyFormData } from '@/lib/players';
-import { getAIMotivationalMessageAction, finalizeSurveyAction } from '@/actions/surveyActions';
+import { getAIMotivationalMessageAction, finalizeSurveyAction, type MotivationalMessageOutput } from '@/actions/surveyActions';
 import { PlayCircle, ChevronLeft, ChevronRight, Send, Loader2, Smile, Frown } from 'lucide-react';
 import Image from 'next/image';
 
@@ -48,6 +48,7 @@ const slideVariants = {
     opacity: 0,
     x: direction < 0 ? '100%' : '-100%',
     transition: { duration: 0.5, ease: 'easeInOut' },
+    transition: { duration: 0.5, ease: 'easeInOut' },
   }),
 };
 
@@ -61,9 +62,9 @@ export function SurveyForm({ players }: SurveyFormProps) {
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(0);
   const [direction, setDirection] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [motivationalMessage, setMotivationalMessage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false); // For AI message generation primarily
+  const [isSubmitting, setIsSubmitting] = useState(false); // For final form submission
+  const [currentAiMessageOutput, setCurrentAiMessageOutput] = useState<MotivationalMessageOutput | null>(null);
   
   const prefilledPlayerName = searchParams.get('playerName');
 
@@ -83,19 +84,22 @@ export function SurveyForm({ players }: SurveyFormProps) {
 
   const handleNext = async () => {
     setDirection(1);
-    if (currentStep === 1) { // Decision step
+    if (currentStep === 1) { // Decision step, moving to Motivation step
       const isValid = await form.trigger(['playerName', 'willContinue']);
       if (!isValid) return;
 
       setIsLoading(true);
+      setCurrentAiMessageOutput(null); // Clear previous message
       try {
         const playerNameValue = form.getValues('playerName');
         const willContinueValue = form.getValues('willContinue') === 'yes';
-        const message = await getAIMotivationalMessageAction(playerNameValue, willContinueValue);
-        setMotivationalMessage(message);
+        const aiResponse = await getAIMotivationalMessageAction(playerNameValue, willContinueValue);
+        setCurrentAiMessageOutput(aiResponse);
         setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
       } catch (error) {
-        toast({ title: 'Erreur', description: 'Impossible de récupérer le message de motivation.', variant: 'destructive' });
+        toast({ title: 'Erreur IA', description: 'Impossible de récupérer le message de motivation. Un message par défaut sera utilisé lors de la soumission.', variant: 'destructive' });
+        // Proceed to next step, onSubmit will handle default message
+        setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1)); 
       } finally {
         setIsLoading(false);
       }
@@ -110,24 +114,30 @@ export function SurveyForm({ players }: SurveyFormProps) {
   };
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    let finalMotivationalMessage = motivationalMessage;
-
     setIsSubmitting(true);
-    if (!finalMotivationalMessage && data.willContinue) {
-        setIsLoading(true); 
-        try {
-            finalMotivationalMessage = await getAIMotivationalMessageAction(data.playerName, data.willContinue === 'yes');
-            setMotivationalMessage(finalMotivationalMessage); 
-        } catch (error) {
-            toast({ title: 'Erreur de Motivation', description: 'Impossible de générer le message IA. Utilisation d\'un message par défaut.', variant: 'default' });
-            finalMotivationalMessage = data.willContinue === 'yes' ? "Super nouvelle ! Préparez-vous pour une saison incroyable." : "Merci pour votre participation ! Nous vous souhaitons le meilleur.";
-        } finally {
-            setIsLoading(false);
+    let messageStringToSave: string;
+
+    if (currentAiMessageOutput && currentAiMessageOutput.message) {
+      messageStringToSave = currentAiMessageOutput.message;
+    } else {
+      // Fallback: currentAiMessageOutput was not set (e.g. AI failed in handleNext) or is invalid.
+      // Regenerate or use a default message.
+      console.warn("SurveyForm: AI message was not available at submission. Generating or defaulting.");
+      setIsLoading(true); // Show loading for this brief fetch/defaulting
+      try {
+        const freshResponse = await getAIMotivationalMessageAction(data.playerName, data.willContinue === 'yes');
+        if (freshResponse && freshResponse.message) {
+          messageStringToSave = freshResponse.message;
+          // setCurrentAiMessageOutput(freshResponse); // Update state for consistency, though user is moving on
+        } else {
+          throw new Error("AI regeneration failed or returned empty.");
         }
-    }
-    
-    if (!finalMotivationalMessage) {
-        finalMotivationalMessage = data.willContinue === 'yes' ? "Message positif par défaut." : "Message de remerciement par défaut.";
+      } catch (error) {
+        toast({ title: 'Erreur Message', description: 'Message IA non disponible pour la sauvegarde. Utilisation d\'un message par défaut.', variant: 'default' });
+        messageStringToSave = data.willContinue === 'yes' ? "Super nouvelle ! Préparez-vous pour une saison incroyable." : "Merci pour votre participation ! Nous vous souhaitons le meilleur.";
+      } finally {
+        setIsLoading(false);
+      }
     }
 
     try {
@@ -136,7 +146,7 @@ export function SurveyForm({ players }: SurveyFormProps) {
         willContinue: data.willContinue === 'yes',
       };
       
-      const result = await finalizeSurveyAction(surveyPayload, finalMotivationalMessage);
+      const result = await finalizeSurveyAction(surveyPayload, messageStringToSave);
 
       if (result.success && result.data) {
         const emailParams = {
@@ -144,7 +154,7 @@ export function SurveyForm({ players }: SurveyFormProps) {
           from_name: data.playerName,
           player_name: data.playerName,
           decision: data.willContinue === 'yes' ? 'Continue la saison prochaine' : 'Ne continue pas la saison prochaine',
-          motivational_message: finalMotivationalMessage,
+          motivational_message: messageStringToSave, // Use the determined string
           reply_to: 'no-reply@futsalfuture.com',
         };
         
@@ -168,18 +178,12 @@ export function SurveyForm({ players }: SurveyFormProps) {
       console.error('Erreur de soumission:', error);
       toast({ title: 'Erreur de Soumission', description: 'Une erreur inattendue est survenue.', variant: 'destructive' });
     } finally {
-      setIsLoading(false); 
-      setIsSubmitting(false);
+      setIsSubmitting(false); 
     }
   };
   
   const currentStepDetails = useMemo(() => {
-    // Defensive check to ensure currentStep is within bounds
     const safeStep = Math.max(0, Math.min(currentStep, steps.length - 1));
-    if (currentStep !== safeStep) {
-      // This condition indicates that currentStep was out of bounds before clamping.
-      // console.warn(`SurveyForm: currentStep ${currentStep} was out of bounds. Clamped to ${safeStep}.`);
-    }
     return steps[safeStep];
   }, [currentStep]);
 
@@ -274,7 +278,9 @@ export function SurveyForm({ players }: SurveyFormProps) {
 
                 {currentStep === 2 && ( 
                   <div className="text-center space-y-6 p-4 border border-primary/50 rounded-lg bg-primary/10">
-                     <p className="text-xl font-semibold text-primary-foreground bg-primary p-3 rounded-md shadow-md">{isLoading ? "Génération du message..." : motivationalMessage}</p>
+                     <p className="text-xl font-semibold text-primary-foreground bg-primary p-3 rounded-md shadow-md">
+                       {isLoading ? "Génération du message..." : (currentAiMessageOutput && currentAiMessageOutput.message ? currentAiMessageOutput.message : "Chargement du message...")}
+                     </p>
                     <p className="text-muted-foreground">Prêt à officialiser ?</p>
                   </div>
                 )}
@@ -312,7 +318,7 @@ export function SurveyForm({ players }: SurveyFormProps) {
         )}
         {currentStep === 2 && (
           <Button onClick={form.handleSubmit(onSubmit)} disabled={isSubmitting || isLoading} className="w-full bg-accent hover:bg-accent/90 text-accent-foreground">
-            {isSubmitting || isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
+            {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
             Soumettre & Terminer
           </Button>
         )}
@@ -322,3 +328,4 @@ export function SurveyForm({ players }: SurveyFormProps) {
   );
 }
 
+    
