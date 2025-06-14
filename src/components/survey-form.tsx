@@ -16,7 +16,8 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import type { Player, SurveyFormData as ActionSurveyFormData } from '@/lib/players';
-import { getAIMotivationalMessageAction, finalizeSurveyAction, type MotivationalMessageOutput } from '@/actions/surveyActions';
+import { getAIMotivationalMessageAction, finalizeSurveyAction } from '@/actions/surveyActions';
+import type { MotivationalMessageOutput } from '@/ai/flows/motivational-message'; // Import the type
 import { PlayCircle, ChevronLeft, ChevronRight, Send, Loader2, Smile, Frown } from 'lucide-react';
 import Image from 'next/image';
 
@@ -47,7 +48,6 @@ const slideVariants = {
   exit: (direction: number) => ({
     opacity: 0,
     x: direction < 0 ? '100%' : '-100%',
-    transition: { duration: 0.5, ease: 'easeInOut' },
     transition: { duration: 0.5, ease: 'easeInOut' },
   }),
 };
@@ -93,12 +93,11 @@ export function SurveyForm({ players }: SurveyFormProps) {
       try {
         const playerNameValue = form.getValues('playerName');
         const willContinueValue = form.getValues('willContinue') === 'yes';
-        const aiResponse = await getAIMotivationalMessageAction(playerNameValue, willContinueValue);
-        setCurrentAiMessageOutput(aiResponse);
+        const aiResponseMessageString = await getAIMotivationalMessageAction(playerNameValue, willContinueValue);
+        setCurrentAiMessageOutput({ message: aiResponseMessageString }); // Correctly wrap the string
         setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
       } catch (error) {
         toast({ title: 'Erreur IA', description: 'Impossible de récupérer le message de motivation. Un message par défaut sera utilisé lors de la soumission.', variant: 'destructive' });
-        // Proceed to next step, onSubmit will handle default message
         setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1)); 
       } finally {
         setIsLoading(false);
@@ -120,21 +119,23 @@ export function SurveyForm({ players }: SurveyFormProps) {
     if (currentAiMessageOutput && currentAiMessageOutput.message) {
       messageStringToSave = currentAiMessageOutput.message;
     } else {
-      // Fallback: currentAiMessageOutput was not set (e.g. AI failed in handleNext) or is invalid.
-      // Regenerate or use a default message.
       console.warn("SurveyForm: AI message was not available at submission. Generating or defaulting.");
-      setIsLoading(true); // Show loading for this brief fetch/defaulting
+      setIsLoading(true);
       try {
-        const freshResponse = await getAIMotivationalMessageAction(data.playerName, data.willContinue === 'yes');
-        if (freshResponse && freshResponse.message) {
-          messageStringToSave = freshResponse.message;
-          // setCurrentAiMessageOutput(freshResponse); // Update state for consistency, though user is moving on
+        const freshResponseString = await getAIMotivationalMessageAction(data.playerName, data.willContinue === 'yes');
+        if (freshResponseString) { // Check if the string itself is truthy
+          messageStringToSave = freshResponseString;
+          setCurrentAiMessageOutput({ message: freshResponseString }); // Update state correctly
         } else {
-          throw new Error("AI regeneration failed or returned empty.");
+           // This case handles if AI returns an empty string or similar non-error empty state
+          toast({ title: 'Message IA Indisponible', description: 'Message de motivation non généré. Utilisation d\'un message par défaut.', variant: 'default' });
+          messageStringToSave = data.willContinue === 'yes' ? "Excellente nouvelle ! Votre engagement est précieux. Préparez-vous pour une saison mémorable !" : "Merci pour votre réponse. Nous respectons votre décision et vous souhaitons le meilleur.";
+          setCurrentAiMessageOutput({ message: messageStringToSave });
         }
-      } catch (error) {
-        toast({ title: 'Erreur Message', description: 'Message IA non disponible pour la sauvegarde. Utilisation d\'un message par défaut.', variant: 'default' });
+      } catch (error) { // This catch is for errors during the getAIMotivationalMessageAction call itself
+        toast({ title: 'Erreur Message (Récup.)', description: 'Message IA non disponible pour la sauvegarde. Utilisation d\'un message par défaut.', variant: 'default' });
         messageStringToSave = data.willContinue === 'yes' ? "Super nouvelle ! Préparez-vous pour une saison incroyable." : "Merci pour votre participation ! Nous vous souhaitons le meilleur.";
+        setCurrentAiMessageOutput({ message: messageStringToSave }); // Also set the default to state for consistency
       } finally {
         setIsLoading(false);
       }
@@ -154,7 +155,7 @@ export function SurveyForm({ players }: SurveyFormProps) {
           from_name: data.playerName,
           player_name: data.playerName,
           decision: data.willContinue === 'yes' ? 'Continue la saison prochaine' : 'Ne continue pas la saison prochaine',
-          motivational_message: messageStringToSave, // Use the determined string
+          motivational_message: messageStringToSave,
           reply_to: 'no-reply@futsalfuture.com',
         };
         
@@ -327,5 +328,7 @@ export function SurveyForm({ players }: SurveyFormProps) {
     </Card>
   );
 }
+
+    
 
     
