@@ -94,7 +94,7 @@ export function SurveyForm({ players }: SurveyFormProps) {
         const playerNameValue = form.getValues('playerName');
         const willContinueValue = form.getValues('willContinue') === 'yes';
         const aiResponseMessageString = await getAIMotivationalMessageAction(playerNameValue, willContinueValue);
-        setCurrentAiMessageOutput({ message: aiResponseMessageString }); // Correctly wrap the string
+        setCurrentAiMessageOutput({ message: aiResponseMessageString }); 
         setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
       } catch (error) {
         toast({ title: 'Erreur IA', description: 'Impossible de récupérer le message de motivation. Un message par défaut sera utilisé lors de la soumission.', variant: 'destructive' });
@@ -123,19 +123,22 @@ export function SurveyForm({ players }: SurveyFormProps) {
       setIsLoading(true);
       try {
         const freshResponseString = await getAIMotivationalMessageAction(data.playerName, data.willContinue === 'yes');
-        if (freshResponseString) { // Check if the string itself is truthy
+        if (freshResponseString) { 
           messageStringToSave = freshResponseString;
-          setCurrentAiMessageOutput({ message: freshResponseString }); // Update state correctly
+          setCurrentAiMessageOutput({ message: freshResponseString }); 
         } else {
-           // This case handles if AI returns an empty string or similar non-error empty state
           toast({ title: 'Message IA Indisponible', description: 'Message de motivation non généré. Utilisation d\'un message par défaut.', variant: 'default' });
-          messageStringToSave = data.willContinue === 'yes' ? "Excellente nouvelle ! Votre engagement est précieux. Préparez-vous pour une saison mémorable !" : "Merci pour votre réponse. Nous respectons votre décision et vous souhaitons le meilleur.";
+          messageStringToSave = data.willContinue === 'yes' 
+            ? `Fantastique nouvelle, ${data.playerName} ! Ton énergie et ton talent sont précieux pour l'équipe. Prépare-toi pour une saison exceptionnelle où nous allons tout donner ensemble !`
+            : `Merci pour tout ce que tu as apporté à l'équipe, ${data.playerName}. Ton esprit combatif a été une source d'inspiration. Nous te souhaitons le meilleur pour tes futurs défis, sur et en dehors des terrains !`;
           setCurrentAiMessageOutput({ message: messageStringToSave });
         }
-      } catch (error) { // This catch is for errors during the getAIMotivationalMessageAction call itself
+      } catch (error) { 
         toast({ title: 'Erreur Message (Récup.)', description: 'Message IA non disponible pour la sauvegarde. Utilisation d\'un message par défaut.', variant: 'default' });
-        messageStringToSave = data.willContinue === 'yes' ? "Super nouvelle ! Préparez-vous pour une saison incroyable." : "Merci pour votre participation ! Nous vous souhaitons le meilleur.";
-        setCurrentAiMessageOutput({ message: messageStringToSave }); // Also set the default to state for consistency
+        messageStringToSave = data.willContinue === 'yes' 
+            ? `Fantastique nouvelle, ${data.playerName} ! Ton énergie et ton talent sont précieux pour l'équipe. Prépare-toi pour une saison exceptionnelle où nous allons tout donner ensemble !`
+            : `Merci pour tout ce que tu as apporté à l'équipe, ${data.playerName}. Ton esprit combatif a été une source d'inspiration. Nous te souhaitons le meilleur pour tes futurs défis, sur et en dehors des terrains !`;
+        setCurrentAiMessageOutput({ message: messageStringToSave }); 
       } finally {
         setIsLoading(false);
       }
