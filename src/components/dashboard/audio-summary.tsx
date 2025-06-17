@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, useEffect } from 'react';
@@ -9,7 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import type { SurveySummary } from '@/types';
 
 interface AudioSummaryProps {
-  surveySummary: SurveySummary; // Pass summary to potentially include in prompt if needed or display context
+  surveySummary: SurveySummary | null; // Can be null if data is not yet loaded
 }
 
 export default function AudioSummary({ surveySummary }: AudioSummaryProps) {
@@ -21,19 +22,27 @@ export default function AudioSummary({ surveySummary }: AudioSummaryProps) {
   const { toast } = useToast();
 
   const handleGenerateSummary = async () => {
+    if (!surveySummary) {
+      toast({
+        title: "Données non disponibles",
+        description: "Les données du résumé ne sont pas encore chargées pour générer l'audio.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
     setAudioDataUri(null); // Clear previous audio
     try {
-      // The current summarizeSurveyResults flow doesn't use input based on the provided .ts file.
-      // If it were to use the surveySummary, it would be passed here.
-      const result = await summarizeSurveyResults({}); 
+      const result = await summarizeSurveyResults(surveySummary); 
       if (result.audioDataUri) {
         setAudioDataUri(result.audioDataUri);
-        toast({
-          title: "Résumé Audio Généré",
-          description: "Le résumé audio des résultats est prêt.",
-        });
+        // Toast was a bit noisy, removing for now or could be conditional
+        // toast({
+        //   title: "Résumé Audio Généré",
+        //   description: "Le résumé audio des résultats est prêt.",
+        // });
       } else {
         throw new Error("Aucune donnée audio retournée par le service.");
       }
@@ -84,6 +93,9 @@ export default function AudioSummary({ surveySummary }: AudioSummaryProps) {
       audioElement.addEventListener('pause', handlePause);
       audioElement.addEventListener('ended', handleEnded);
 
+      // When a new audio URI is set, reset playback state
+      setIsPlaying(false);
+
       return () => {
         audioElement.removeEventListener('play', handlePlay);
         audioElement.removeEventListener('pause', handlePause);
@@ -101,21 +113,22 @@ export default function AudioSummary({ surveySummary }: AudioSummaryProps) {
           Résumé Audio des Résultats
         </CardTitle>
         <CardDescription>
-          Écoutez un résumé rapide des statistiques actuelles du sondage.
+          Écoutez un résumé rapide généré par IA des statistiques actuelles du sondage.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <Button
           onClick={handleGenerateSummary}
-          disabled={isLoading}
+          disabled={isLoading || !surveySummary}
           className="w-full font-headline text-lg bg-primary hover:bg-primary/90 text-primary-foreground rounded-md shadow"
+          aria-live="polite"
         >
           {isLoading ? (
             <Loader2 className="mr-2 h-5 w-5 animate-spin" />
           ) : (
             <Volume2 className="mr-2 h-5 w-5" />
           )}
-          {isLoading ? 'Génération en cours...' : 'Générer le Résumé Audio'}
+          {isLoading ? 'Génération en cours...' : (surveySummary ? 'Générer le Résumé Audio' : 'Résumé non disponible')}
         </Button>
 
         {error && (
@@ -127,7 +140,7 @@ export default function AudioSummary({ surveySummary }: AudioSummaryProps) {
 
         {audioDataUri && (
           <div className="mt-4 p-4 border rounded-md bg-muted/50 space-y-3">
-            <audio ref={audioRef} src={audioDataUri} className="hidden" />
+            <audio ref={audioRef} src={audioDataUri} className="hidden" controls preload="metadata" />
             <div className="flex items-center justify-center space-x-3">
               <Button onClick={togglePlayPause} variant="outline" size="icon" aria-label={isPlaying ? "Pause" : "Play"}>
                 {isPlaying ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6" />}
@@ -143,3 +156,4 @@ export default function AudioSummary({ surveySummary }: AudioSummaryProps) {
     </Card>
   );
 }
+
