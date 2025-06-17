@@ -24,9 +24,9 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useSurveyStore } from "@/store/survey";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import type { SurveyResponse } from "@/types";
+import type { SurveyResponse, Player } from "@/types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Smile, Frown, CheckCircle, Info } from "lucide-react";
+import { Smile, Frown, CheckCircle, Info, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
@@ -39,18 +39,24 @@ type SurveyFormValues = z.infer<typeof formSchema>;
 export default function SurveyForm() {
   const router = useRouter();
   const { toast } = useToast();
-  const { players, addResponse, responses } = useSurveyStore();
+  const { players, addResponse, responses, isLoadingPlayers, fetchPlayers, initStore } = useSurveyStore();
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isParticipating, setIsParticipating] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<SurveyFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       playerId: "",
-      participating: false, // "Non" par défaut
+      participating: false, 
     },
   });
+  
+  useEffect(() => {
+    // initStore(); // L'initialisation est maintenant globale dans le store
+  }, [initStore]);
+
 
   const respondedPlayerIds = new Set(responses.map(r => r.playerId));
   const availablePlayers = players.filter(p => !respondedPlayerIds.has(p.id));
@@ -62,17 +68,17 @@ export default function SurveyForm() {
   }, [selectedPlayerId, form]);
   
   useEffect(() => {
-    if (availablePlayers.length === 0 && players.length > 0) {
+    if (!isLoadingPlayers && availablePlayers.length === 0 && players.length > 0) {
       toast({
         title: "Sondage Terminé",
         description: "Tous les joueurs ont répondu. Merci!",
-        variant: "default"
       });
     }
-  }, [availablePlayers, players, router, toast]);
+  }, [availablePlayers.length, players.length, isLoadingPlayers, toast]);
 
 
-  function onSubmit(values: SurveyFormValues) {
+  async function onSubmit(values: SurveyFormValues) {
+    setIsSubmitting(true);
     const player = players.find(p => p.id === values.playerId);
     if (!player) {
       toast({
@@ -80,30 +86,47 @@ export default function SurveyForm() {
         description: "Joueur non trouvé.",
         variant: "destructive",
       });
+      setIsSubmitting(false);
       return;
     }
 
-    const response: SurveyResponse = {
-      id: crypto.randomUUID(),
-      playerId: player.id,
-      playerName: player.name,
-      participating: values.participating,
-      submissionTime: new Date().toISOString(),
-    };
-    addResponse(response);
-    setIsParticipating(values.participating);
-    setShowConfirmation(true);
-
-    setTimeout(() => {
-      setShowConfirmation(false);
-      router.push("/dashboard");
-      toast({
-        title: "Réponse Enregistrée!",
-        description: `Merci ${player.name} pour votre réponse.`,
-        variant: "default",
-        action: <CheckCircle className="text-green-500" />,
+    try {
+      await addResponse({
+        playerId: player.id,
+        // playerName: player.name, // playerName est géré dans addResponse
+        participating: values.participating,
       });
-    }, 3000);
+      setIsParticipating(values.participating);
+      setShowConfirmation(true);
+
+      setTimeout(() => {
+        setShowConfirmation(false);
+        router.push("/dashboard");
+        toast({
+          title: "Réponse Enregistrée!",
+          description: `Merci ${player.name} pour votre réponse.`,
+          action: <CheckCircle className="text-green-500" />,
+        });
+      }, 3000);
+    } catch (error) {
+      console.error("Submission error", error);
+      toast({
+        title: "Erreur d'Envoi",
+        description: "Une erreur est survenue lors de l'enregistrement de votre réponse.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  if (isLoadingPlayers) {
+    return (
+      <div className="flex justify-center items-center h-40">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        <p className="ml-4 text-lg text-muted-foreground">Chargement des joueurs...</p>
+      </div>
+    );
   }
 
   if (showConfirmation) {
@@ -123,7 +146,7 @@ export default function SurveyForm() {
     );
   }
   
-  if (availablePlayers.length === 0 && players.length > 0) {
+  if (!isLoadingPlayers && availablePlayers.length === 0 && players.length > 0) {
     return (
        <Alert variant="default" className="border-primary bg-card text-center p-8 rounded-lg shadow-lg">
         <Info className="h-16 w-16 mx-auto mb-4 text-primary" />
@@ -151,10 +174,10 @@ export default function SurveyForm() {
               <Select onValueChange={(value) => {
                 field.onChange(value);
                 setSelectedPlayerId(value);
-              }} defaultValue={field.value}>
+              }} defaultValue={field.value} disabled={isLoadingPlayers || availablePlayers.length === 0}>
                 <FormControl>
                   <SelectTrigger className="text-lg h-12 rounded-md border-input focus:ring-primary focus:border-primary">
-                    <SelectValue placeholder="Sélectionnez votre nom dans la liste" />
+                    <SelectValue placeholder={isLoadingPlayers ? "Chargement..." : "Sélectionnez votre nom dans la liste"} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent className="bg-card text-foreground">
@@ -163,9 +186,14 @@ export default function SurveyForm() {
                       {player.name}
                     </SelectItem>
                   ))}
-                  {availablePlayers.length === 0 && players.length > 0 && (
+                  {players.length > 0 && availablePlayers.length === 0 && (
                     <SelectItem value="no-players" disabled>
                       Tous les joueurs ont répondu
+                    </SelectItem>
+                  )}
+                   {players.length === 0 && !isLoadingPlayers && (
+                    <SelectItem value="no-players-loaded" disabled>
+                      Aucun joueur chargé. Vérifiez la configuration.
                     </SelectItem>
                   )}
                 </SelectContent>
@@ -213,11 +241,11 @@ export default function SurveyForm() {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full font-headline text-2xl py-6 bg-accent hover:bg-accent/90 text-accent-foreground rounded-lg shadow-md hover:shadow-lg transition-all duration-150 ease-in-out transform hover:scale-101" disabled={form.formState.isSubmitting}>
-          {form.formState.isSubmitting ? "Envoi en cours..." : "Valider ma Réponse"}
+        <Button type="submit" className="w-full font-headline text-2xl py-6 bg-accent hover:bg-accent/90 text-accent-foreground rounded-lg shadow-md hover:shadow-lg transition-all duration-150 ease-in-out transform hover:scale-101" disabled={isSubmitting || isLoadingPlayers}>
+          {isSubmitting ? <Loader2 className="mr-2 h-6 w-6 animate-spin" /> : null}
+          {isSubmitting ? "Envoi en cours..." : "Valider ma Réponse"}
         </Button>
       </form>
     </Form>
   );
 }
-

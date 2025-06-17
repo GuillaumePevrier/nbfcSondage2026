@@ -1,14 +1,17 @@
+
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useSurveyStore } from "@/store/survey";
-import type { SurveyResponse, SurveySummary } from "@/types";
+import type { SurveyResponse, SurveySummary, Player } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { CheckCircle2, XCircle, HelpCircle, Users, ShieldCheck, ShieldOff, Info } from "lucide-react";
+import { CheckCircle2, XCircle, HelpCircle, Users, ShieldCheck, ShieldOff, Info, Loader2, RefreshCw } from "lucide-react";
 import AudioSummary from "./audio-summary";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+
 
 const StatCard = ({ title, value, icon, color, description }: { title: string; value: string | number; icon: React.ElementType; color?: string; description?: string }) => {
   const IconComponent = icon;
@@ -28,26 +31,81 @@ const StatCard = ({ title, value, icon, color, description }: { title: string; v
 
 
 export default function DashboardContent() {
-  const { getSummary, responses, players, resetResponses } = useSurveyStore();
+  const { 
+    getSummary, 
+    responses, 
+    players, 
+    resetResponses, 
+    isLoadingPlayers, 
+    isLoadingResponses,
+    fetchPlayers,
+    fetchResponses,
+    initStore
+  } = useSurveyStore();
   const [summary, setSummary] = useState<SurveySummary | null>(null);
-  const [mounted, setMounted] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+  const { toast } = useToast();
+  const [isResetting, setIsResetting] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-    // Initial summary calculation
+  const updateSummary = useCallback(() => {
     setSummary(getSummary());
-    // Subscribe to changes in the store to update summary
-    const unsubscribe = useSurveyStore.subscribe(
-      (currentState) => setSummary(currentState.getSummary())
-    );
-    return () => unsubscribe();
   }, [getSummary]);
 
+  useEffect(() => {
+    setIsMounted(true);
+    // initStore(); // L'initialisation est maintenant globale dans le store
+    updateSummary(); // Initial summary calculation
 
-  if (!mounted || !summary) {
-    // Skeleton or loading state
+    const unsubscribe = useSurveyStore.subscribe(
+      (currentState) => {
+        setSummary(currentState.getSummary());
+      }
+    );
+    return () => unsubscribe();
+  }, [updateSummary, initStore]);
+
+  const handleRefreshData = async () => {
+    setIsRefreshing(true);
+    toast({ title: "Rafraîchissement...", description: "Mise à jour des données du sondage."});
+    await fetchPlayers();
+    await fetchResponses();
+    updateSummary(); // Make sure summary is updated after fetching
+    setIsRefreshing(false);
+    toast({ title: "Données à jour!", description: "Les informations du sondage ont été actualisées."});
+  };
+
+  const handleReset = async () => {
+    if(confirm("Êtes-vous sûr de vouloir réinitialiser toutes les réponses ? Cette action est irréversible et supprimera les données de la base de données.")) {
+      setIsResetting(true);
+      try {
+        await resetResponses();
+        toast({
+          title: "Réponses Réinitialisées",
+          description: "Toutes les réponses au sondage ont été effacées.",
+        });
+        updateSummary(); // Update summary after reset
+      } catch (error) {
+        console.error("Error resetting responses:", error);
+        toast({
+          title: "Erreur de Réinitialisation",
+          description: "Impossible de réinitialiser les réponses.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsResetting(false);
+      }
+    }
+  };
+
+
+  if (!isMounted || isLoadingPlayers || isLoadingResponses && !summary ) {
     return (
       <div className="space-y-8">
+         <div className="flex justify-center items-center h-64">
+          <Loader2 className="h-16 w-16 animate-spin text-primary" />
+          <p className="ml-4 text-2xl text-muted-foreground">Chargement des données du tableau de bord...</p>
+        </div>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {[...Array(4)].map((_, i) => (
             <Card key={i} className="shadow-lg">
@@ -62,22 +120,33 @@ export default function DashboardContent() {
             </Card>
           ))}
         </div>
-        <Card className="shadow-lg">
-          <CardHeader>
-            <CardTitle className="h-6 bg-muted rounded w-1/3 animate-pulse"></CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-40 bg-muted rounded animate-pulse"></div>
-          </CardContent>
-        </Card>
       </div>
     );
+  }
+  
+  if (!summary) { // Handle case where summary is null after loading
+     return (
+      <div className="text-center py-10">
+        <Info className="mx-auto h-12 w-12 text-muted-foreground" />
+        <p className="mt-4 text-lg text-muted-foreground">Aucune donnée de résumé disponible.</p>
+        <Button onClick={handleRefreshData} className="mt-4" disabled={isRefreshing}>
+          {isRefreshing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
+          Rafraîchir les données
+        </Button>
+      </div>
+     );
   }
   
   const respondedPercentage = summary.totalPlayers > 0 ? ((summary.yes + summary.no) / summary.totalPlayers) * 100 : 0;
 
   return (
     <div className="space-y-8">
+      <div className="flex justify-end">
+        <Button onClick={handleRefreshData} variant="outline" disabled={isRefreshing || isLoadingPlayers || isLoadingResponses}>
+          {isRefreshing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
+          Rafraîchir les Données
+        </Button>
+      </div>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <StatCard title="Réponses 'Oui'" value={summary.yes} icon={ShieldCheck} color="text-green-500" description="Joueurs confirmés" />
         <StatCard title="Réponses 'Non'" value={summary.no} icon={ShieldOff} color="text-red-500" description="Joueurs non partants" />
@@ -150,18 +219,15 @@ export default function DashboardContent() {
              <div className="text-center py-10">
                 <Info className="mx-auto h-12 w-12 text-muted-foreground" />
                 <p className="mt-4 text-lg text-muted-foreground">Aucun joueur configuré.</p>
-                <p className="text-sm text-muted-foreground">Veuillez vérifier la liste des joueurs.</p>
+                <p className="text-sm text-muted-foreground">Veuillez vérifier la liste des joueurs ou rafraîchir.</p>
             </div>
           )}
         </CardContent>
       </Card>
 
       <div className="mt-8 flex justify-end">
-        <Button variant="destructive" onClick={() => {
-          if(confirm("Êtes-vous sûr de vouloir réinitialiser toutes les réponses ? Cette action est irréversible.")) {
-            resetResponses();
-          }
-        }} className="font-headline">
+        <Button variant="destructive" onClick={handleReset} className="font-headline" disabled={isResetting}>
+          {isResetting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
           Réinitialiser les Réponses
         </Button>
       </div>
