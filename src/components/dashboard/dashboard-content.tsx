@@ -31,12 +31,11 @@ const StatCard = ({ title, value, icon, color, description }: { title: string; v
 
 
 export default function DashboardContent() {
-  const { 
-    getSummary, 
-    responses, 
-    players, 
-    resetResponses, 
-    isLoadingPlayers, 
+  const {
+    getSummary,
+    responses,
+    players,
+    isLoadingPlayers,
     isLoadingResponses,
     fetchPlayers,
     fetchResponses,
@@ -45,7 +44,6 @@ export default function DashboardContent() {
   const [summary, setSummary] = useState<SurveySummary | null>(null);
   const [isMounted, setIsMounted] = useState(false);
   const { toast } = useToast();
-  const [isResetting, setIsResetting] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const updateSummary = useCallback(() => {
@@ -75,29 +73,6 @@ export default function DashboardContent() {
     toast({ title: "Données à jour!", description: "Les informations du sondage ont été actualisées."});
   };
 
-  const handleReset = async () => {
-    if(confirm("Êtes-vous sûr de vouloir réinitialiser toutes les réponses ? Cette action est irréversible et supprimera les données de la base de données.")) {
-      setIsResetting(true);
-      try {
-        await resetResponses();
-        toast({
-          title: "Réponses Réinitialisées",
-          description: "Toutes les réponses au sondage ont été effacées.",
-        });
-        updateSummary(); // Update summary after reset
-      } catch (error) {
-        console.error("Error resetting responses:", error);
-        toast({
-          title: "Erreur de Réinitialisation",
-          description: "Impossible de réinitialiser les réponses.",
-          variant: "destructive",
-        });
-      } finally {
-        setIsResetting(false);
-      }
-    }
-  };
-
 
   if (!isMounted || isLoadingPlayers || isLoadingResponses && !summary ) {
     return (
@@ -123,7 +98,7 @@ export default function DashboardContent() {
       </div>
     );
   }
-  
+
   if (!summary) { // Handle case where summary is null after loading
      return (
       <div className="text-center py-10">
@@ -136,7 +111,7 @@ export default function DashboardContent() {
       </div>
      );
   }
-  
+
   const respondedPercentage = summary.totalPlayers > 0 ? ((summary.yes + summary.no) / summary.totalPlayers) * 100 : 0;
 
   return (
@@ -166,7 +141,7 @@ export default function DashboardContent() {
       </Card>
 
       <AudioSummary surveySummary={summary} />
-      
+
       <Card className="shadow-lg">
         <CardHeader>
           <CardTitle className="text-2xl font-headline text-primary">Détail des Réponses</CardTitle>
@@ -224,13 +199,8 @@ export default function DashboardContent() {
           )}
         </CardContent>
       </Card>
-
-      <div className="mt-8 flex justify-end">
-        <Button variant="destructive" onClick={handleReset} className="font-headline" disabled={isResetting}>
-          {isResetting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-          Réinitialiser les Réponses
-        </Button>
-      </div>
     </div>
   );
 }
+
+    
