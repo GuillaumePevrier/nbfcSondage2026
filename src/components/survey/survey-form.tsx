@@ -1,3 +1,4 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useSurveyStore } from "@/store/survey";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -47,11 +48,10 @@ export default function SurveyForm() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       playerId: "",
-      participating: false,
+      participating: false, // "Non" par défaut
     },
   });
 
-  // Filter out players who have already responded
   const respondedPlayerIds = new Set(responses.map(r => r.playerId));
   const availablePlayers = players.filter(p => !respondedPlayerIds.has(p.id));
 
@@ -62,14 +62,12 @@ export default function SurveyForm() {
   }, [selectedPlayerId, form]);
   
   useEffect(() => {
-    // If no available players, maybe show a message or redirect
     if (availablePlayers.length === 0 && players.length > 0) {
       toast({
         title: "Sondage Terminé",
         description: "Tous les joueurs ont répondu. Merci!",
         variant: "default"
       });
-      // router.push('/dashboard'); // Optionally redirect
     }
   }, [availablePlayers, players, router, toast]);
 
@@ -86,7 +84,7 @@ export default function SurveyForm() {
     }
 
     const response: SurveyResponse = {
-      id: crypto.randomUUID(), // Generate a unique ID for the response
+      id: crypto.randomUUID(),
       playerId: player.id,
       playerName: player.name,
       participating: values.participating,
@@ -96,7 +94,6 @@ export default function SurveyForm() {
     setIsParticipating(values.participating);
     setShowConfirmation(true);
 
-    // Hide confirmation and redirect after a delay
     setTimeout(() => {
       setShowConfirmation(false);
       router.push("/dashboard");
@@ -106,7 +103,7 @@ export default function SurveyForm() {
         variant: "default",
         action: <CheckCircle className="text-green-500" />,
       });
-    }, 3000); // 3 seconds delay
+    }, 3000);
   }
 
   if (showConfirmation) {
@@ -182,21 +179,37 @@ export default function SurveyForm() {
           control={form.control}
           name="participating"
           render={({ field }) => (
-            <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border border-input p-4 shadow-sm hover:shadow-md transition-shadow bg-background">
+            <FormItem className="space-y-3">
+              <FormLabel className="text-xl font-headline text-primary">Votre décision pour la saison prochaine :</FormLabel>
               <FormControl>
-                <Checkbox
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                  id="participating-checkbox"
-                  className="h-6 w-6 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground border-primary focus-visible:ring-primary"
-                  aria-labelledby="participating-label"
-                />
+                <RadioGroup
+                  onValueChange={(value) => field.onChange(value === "true")}
+                  value={String(field.value)}
+                  className="space-y-3"
+                >
+                  <FormItem className="rounded-md border border-input p-4 shadow-sm hover:shadow-md transition-shadow has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/10">
+                    <div className="flex items-center space-x-3">
+                      <FormControl>
+                        <RadioGroupItem value="true" id="participating-yes" />
+                      </FormControl>
+                      <FormLabel htmlFor="participating-yes" className="text-lg font-normal text-foreground cursor-pointer flex-1">
+                        Oui, je continue le futsal l'année prochaine
+                      </FormLabel>
+                    </div>
+                  </FormItem>
+                  <FormItem className="rounded-md border border-input p-4 shadow-sm hover:shadow-md transition-shadow has-[[data-state=checked]]:border-accent has-[[data-state=checked]]:bg-accent/10">
+                    <div className="flex items-center space-x-3">
+                      <FormControl>
+                        <RadioGroupItem value="false" id="participating-no" />
+                      </FormControl>
+                      <FormLabel htmlFor="participating-no" className="text-lg font-normal text-foreground cursor-pointer flex-1">
+                        Non, je ne continue pas le futsal l'année prochaine
+                      </FormLabel>
+                    </div>
+                  </FormItem>
+                </RadioGroup>
               </FormControl>
-              <div className="space-y-1 leading-none">
-                <FormLabel id="participating-label" htmlFor="participating-checkbox" className="text-xl font-headline text-primary cursor-pointer">
-                  Je continue le futsal l'année prochaine
-                </FormLabel>
-              </div>
+              <FormMessage />
             </FormItem>
           )}
         />
@@ -207,3 +220,4 @@ export default function SurveyForm() {
     </Form>
   );
 }
+
