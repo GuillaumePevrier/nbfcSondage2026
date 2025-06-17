@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState }_ from "react";
+import { useEffect, useState } from "react";
 import { useSurveyStore } from "@/store/survey";
 import type { SurveyResponse, SurveySummary } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
