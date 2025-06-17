@@ -1,95 +1,102 @@
 
--- Supabase Table Setup Script
+-- Supprime les tables existantes si elles existent (pour repartir à neuf si besoin)
+-- ATTENTION: CECI SUPPRIMERA TOUTES LES DONNÉES DE CES TABLES.
+DROP TABLE IF EXISTS public.survey_responses;
+DROP TABLE IF EXISTS public.joueurs;
 
--- Step 0: (Optional but Recommended) Set the search path
--- Ensures that 'public' schema is preferred. If you use other schemas, adjust accordingly.
--- SET search_path TO public;
-
--- Step 1: Ensure 'joueurs' table is correctly set up
--- This script attempts to create the table if it doesn't exist,
--- with 'id' as a UUID primary key.
-
--- IMPORTANT: If the 'joueurs' table already exists from a previous attempt
--- and its 'id' column is NOT a UUID or NOT a primary key,
--- the `CREATE TABLE IF NOT EXISTS` command below might not fix it.
--- In such cases, you might need to DROP the existing 'joueurs' table first.
--- Be very careful with DROP TABLE as it DELETES ALL DATA in that table.
--- Only uncomment and run the line below if you are sure, have backups,
--- or can easily re-import your player data.
---
--- DROP TABLE IF EXISTS public.joueurs CASCADE;
-
-CREATE TABLE IF NOT EXISTS public.joueurs (
+-- 1. Création de la table "joueurs"
+CREATE TABLE public.joueurs (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   nom text NOT NULL,
-  CONSTRAINT joueurs_pkey PRIMARY KEY (id)
+  created_at timestamptz NOT NULL DEFAULT now(), -- Champ optionnel pour le suivi
+  CONSTRAINT joueurs_pkey PRIMARY KEY (id),
+  CONSTRAINT joueurs_nom_key UNIQUE (nom) -- S'assurer que les noms des joueurs sont uniques si nécessaire
 );
 
--- After creating the table, or if it already exists and you want to ensure RLS is on:
+-- Activer Row Level Security (RLS) pour la table "joueurs"
 ALTER TABLE public.joueurs ENABLE ROW LEVEL SECURITY;
 
--- Define Row Level Security (RLS) policies for 'joueurs' table.
--- Adjust these policies based on your application's security requirements.
+-- Politiques RLS pour la table "joueurs"
+-- Permettre la lecture publique des joueurs (adaptable selon les besoins)
+CREATE POLICY "Allow public read access to joueurs" ON public.joueurs
+  FOR SELECT USING (true);
 
--- Example: Allow public read access to player names and IDs.
-CREATE POLICY "Allow public read access on joueurs"
-  ON public.joueurs FOR SELECT
-  USING (true);
+-- Permettre l'insertion de nouveaux joueurs par les utilisateurs authentifiés
+-- (ou restreindre à un rôle 'admin' si vous avez un système d'administration)
+CREATE POLICY "Allow authenticated users to insert joueurs" ON public.joueurs
+  FOR INSERT WITH CHECK (auth.role() = 'authenticated');
 
--- Example: If you have an admin interface or specific authenticated users
--- who should be able to add/modify players, define policies for INSERT, UPDATE, DELETE.
--- For instance, to allow any authenticated user to insert (you might want to restrict this further):
--- CREATE POLICY "Allow authenticated insert on joueurs"
---   ON public.joueurs FOR INSERT
---   TO authenticated
---   WITH CHECK (true);
+-- Permettre aux utilisateurs authentifiés de mettre à jour les joueurs
+-- (vous voudrez peut-être restreindre cela aux propriétaires ou aux administrateurs)
+CREATE POLICY "Allow authenticated users to update joueurs" ON public.joueurs
+  FOR UPDATE USING (auth.role() = 'authenticated') WITH CHECK (auth.role() = 'authenticated');
+
+-- Permettre aux utilisateurs authentifiés de supprimer des joueurs
+-- (typiquement une opération d'administrateur)
+CREATE POLICY "Allow authenticated users to delete joueurs" ON public.joueurs
+  FOR DELETE USING (auth.role() = 'authenticated');
+
+-- Commenter/Décommenter la politique ci-dessous si vous voulez que ce soit complètement public sans authentification pour les modifications
+-- ATTENTION: Non recommandé pour la production sans une autre forme de contrôle d'accès.
+-- CREATE POLICY "Allow anonymous insert/update/delete for joueurs" ON public.joueurs
+-- FOR ALL USING (true) WITH CHECK (true);
 
 
--- Step 2: Create 'survey_responses' table
--- This table will store the responses from the survey.
--- The 'player_id' column will reference the 'id' from the 'joueurs' table.
-
-CREATE TABLE IF NOT EXISTS public.survey_responses (
+-- 2. Création de la table "survey_responses"
+CREATE TABLE public.survey_responses (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   player_id uuid NOT NULL,
-  player_name text NOT NULL, -- Denormalized for convenience, could be joined instead
+  player_name text NOT NULL, -- Dénormalisé pour faciliter l'affichage, mais on pourrait aussi joindre.
   participating boolean NOT NULL,
   submission_time timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT survey_responses_pkey PRIMARY KEY (id),
-  CONSTRAINT survey_responses_player_id_fkey FOREIGN KEY (player_id) REFERENCES public.joueurs(id) ON UPDATE CASCADE ON DELETE CASCADE
+  CONSTRAINT survey_responses_player_id_fkey FOREIGN KEY (player_id) REFERENCES public.joueurs(id) ON UPDATE CASCADE ON DELETE CASCADE,
+  CONSTRAINT survey_responses_unique_player_submission UNIQUE (player_id) -- S'assurer qu'un joueur ne peut soumettre qu'une seule réponse
 );
 
--- Enable Row Level Security (RLS) for 'survey_responses' table
+-- Activer Row Level Security (RLS) pour la table "survey_responses"
 ALTER TABLE public.survey_responses ENABLE ROW LEVEL SECURITY;
 
--- Define RLS policies for 'survey_responses'.
--- Adjust these policies based on your application's security requirements.
+-- Politiques RLS pour la table "survey_responses"
+-- Permettre la lecture publique des réponses au sondage
+CREATE POLICY "Allow public read access to survey_responses" ON public.survey_responses
+  FOR SELECT USING (true);
 
--- Example: Allow public read access to survey responses (e.g., for the dashboard).
-CREATE POLICY "Allow public read access on survey_responses"
-  ON public.survey_responses FOR SELECT
-  USING (true);
+-- Permettre aux utilisateurs authentifiés (ou anonymes si le sondage est public) d'insérer des réponses
+-- Pour un sondage où n'importe qui peut répondre sans se connecter, utilisez `USING (true) WITH CHECK (true)`
+-- Si seules les personnes connectées peuvent répondre : `USING (auth.role() = 'authenticated') WITH CHECK (auth.role() = 'authenticated')`
+-- Ici, nous allons permettre l'insertion anonyme, car le formulaire de sondage ne semble pas nécessiter de connexion.
+CREATE POLICY "Allow anonymous insert to survey_responses" ON public.survey_responses
+  FOR INSERT WITH CHECK (true);
 
--- Example: Allow anyone (anonymous users included) to submit a survey response.
--- This is suitable if your survey form is public.
-CREATE POLICY "Allow anonymous insert on survey_responses"
-  ON public.survey_responses FOR INSERT
-  WITH CHECK (true);
+-- Permettre la suppression des réponses par les utilisateurs authentifiés (par exemple, pour la fonction "Réinitialiser les Réponses")
+-- Il serait préférable de restreindre cela à un rôle d'administrateur.
+CREATE POLICY "Allow authenticated users to delete survey_responses" ON public.survey_responses
+  FOR DELETE USING (auth.role() = 'authenticated');
+  
+-- Commenter/Décommenter si vous n'utilisez pas d'authentification pour la suppression et que l'API gère la sécurité
+-- CREATE POLICY "Allow anonymous delete to survey_responses" ON public.survey_responses
+-- FOR DELETE USING (true);
 
--- Example: Allow anyone (anonymous users included) to delete responses.
--- This is used by the "Reset Responses" button. You might want to restrict this
--- to authenticated users or specific admin roles in a production app.
-CREATE POLICY "Allow anonymous delete for survey_responses"
-  ON public.survey_responses FOR DELETE
-  USING (true);
 
--- Optional: Create an index on 'player_id' in 'survey_responses' for faster lookups.
+-- Index pour améliorer les performances des requêtes sur player_id dans survey_responses
 CREATE INDEX IF NOT EXISTS idx_survey_responses_player_id ON public.survey_responses(player_id);
+CREATE INDEX IF NOT EXISTS idx_joueurs_nom ON public.joueurs(nom);
 
--- After running these SQL commands in your Supabase SQL Editor:
--- 1. Ensure your '.env' or '.env.local' file has the correct NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.
--- 2. If you dropped the 'joueurs' table, or if it's empty, re-import your players using
---    the script: `npm run import-players`
---    or by calling the API endpoint: `/api/import-players?secret=yourimportsecret`
---    (Ensure IMPORT_SECRET is also set in your .env file if using the API route).
+-- Message final
+SELECT 'Script de configuration de la base de données exécuté avec succès.' as status;
 
+-- Instructions supplémentaires:
+-- 1. Exécutez ce script dans l'éditeur SQL de votre projet Supabase.
+-- 2. Assurez-vous que vos variables d'environnement NEXT_PUBLIC_SUPABASE_URL et NEXT_PUBLIC_SUPABASE_ANON_KEY sont correctement configurées dans votre fichier .env.local.
+-- 3. Si vous repartez de zéro avec la table 'joueurs', n'oubliez pas de réimporter vos joueurs via le script `npm run import-players` ou l'API route `/api/import-players`.
+--    Le script `importPlayers.ts` suppose que la table 'joueurs' a une colonne 'nom'.
+--    L'API route `pages/api/import-players.ts` fait de même.
+--    Si la contrainte `UNIQUE (nom)` sur `joueurs` pose problème lors de l'importation de doublons,
+--    vous devrez nettoyer `players.json` ou gérer les conflits dans le script d'import (`ON CONFLICT DO NOTHING` ou `ON CONFLICT DO UPDATE`).
+--    Pour l'instant, le script d'import actuel ne gère pas les conflits.
+
+-- Exemple de gestion des conflits lors de l'insertion (à ajouter dans votre script d'import si besoin):
+-- .insert([{ nom: player.nom }])
+-- .onConflict('nom') // Suppose que 'nom' a une contrainte UNIQUE
+-- .ignore() // Ou .merge() pour mettre à jour
