@@ -2,8 +2,8 @@
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import type { SurveyResponse, Player } from '@/types';
-import { players as defaultPlayers } from '@/data/players';
+import type { SurveyResponse, Player } from '/home/user/studio/src/types/index.ts';
+import playersData from '@/data/players.json';
 
 interface SurveyState {
   responses: SurveyResponse[];
@@ -13,30 +13,18 @@ interface SurveyState {
   resetResponses: () => void; 
 }
 
-const getInitialPlayers = (): Player[] => {
-  if (typeof window !== 'undefined') {
-    const storedPlayers = localStorage.getItem('futsal-players');
-    if (storedPlayers) {
-      try {
-        const parsedPlayers = JSON.parse(storedPlayers);
-        if (Array.isArray(parsedPlayers) && parsedPlayers.length > 0) {
-          return parsedPlayers;
-        }
-      } catch (e) {
-        console.error("Failed to parse players from localStorage", e);
-      }
-    }
-  }
-  return defaultPlayers;
-};
-
+// Map players from JSON data, ensuring each has an 'id'
+const initialPlayersFromJSON: Player[] = playersData.map((player: { nom: string }) => ({
+  id: crypto.randomUUID(), // Generate a unique ID for each player from JSON
+  name: player.nom,
+}));
 
 export const useSurveyStore = create<SurveyState>()(
   persist(
     (set, get) => ({
       responses: [],
-      players: getInitialPlayers(),
-      addResponse: (response) =>
+      players: initialPlayersFromJSON, // Use players directly from JSON
+      addResponse: (response) => // Ensure response also includes playerName from the form logic
         set((state) => {
           // Remove existing response for the player, if any
           const otherResponses = state.responses.filter(r => r.playerId !== response.playerId);
@@ -66,7 +54,7 @@ export const useSurveyStore = create<SurveyState>()(
       partialize: (state) => ({ responses: state.responses }), // Only persist responses
       onRehydrateStorage: () => (state) => {
         if (state) {
-          state.players = getInitialPlayers(); // Ensure players are re-initialized on rehydration
+          state.players = initialPlayersFromJSON; // Always load players from JSON on rehydration
         }
       }
     }
